@@ -756,7 +756,7 @@
 
             previewBtn.disabled = false;
             viewMessagesBtn.disabled = false;
-            sendAllBtn.disabled = false;
+            sendAllBtn.disabled = true; // Disable send button until data is confirmed
             statusDiv.textContent = `Data ${isFromAPI ? 'synced' : 'loaded'} successfully. ${jsonData.length} records found.`;
             loadingOverlay.style.display = 'none';
             showToast(isFromAPI ? 'Data synced successfully!' : 'File uploaded successfully!');
@@ -796,8 +796,13 @@
                 const response = await fetch(GOOGLE_SHEET_API, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Origin': 'https://tsc-notifier.netlify.app',
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
                     },
+                    mode: 'cors',
+                    credentials: 'omit',
                     signal: AbortSignal.timeout(10000)
                 });
 
@@ -814,7 +819,7 @@
                 // Process data exactly like file upload
                 const isValid = await validateAndProcessData(data, true);
                 if (isValid) {
-                    // Ensure message preview uses the synced data
+                    // Enable buttons after successful sync
                     viewMessagesBtn.disabled = false;
                     previewBtn.disabled = false;
                     sendAllBtn.disabled = false;
