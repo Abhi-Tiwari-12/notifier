@@ -3,258 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSC WhatsApp Template Initializer</title>
+    <title>TSC Arcitect Notifier</title>
+    <link rel="icon" type="image/x-icon" href="squares.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-            background: #0a0a1b;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: #000000;
             min-height: 100vh;
+            margin: 0;
+            color: #ffffff;
             display: flex;
             flex-direction: column;
-            margin: 0;
             overflow-x: hidden;
-            color: white;
+            position: relative;
         }
-        .stars {
+        canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 1;
+            z-index: -1;
+            opacity: 0.5;
         }
-        .star {
-            position: absolute;
-            background: #ffffff;
-            border-radius: 50%;
-            animation: twinkle 4s infinite, moveStar 15s linear infinite;
-        }
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-        @keyframes moveStar {
-            0% { transform: translateX(0) translateY(100vh); }
-            100% { transform: translateX(-30vw) translateY(-100vh); }
-        }
-        header {
-            position: fixed;
+        .header {
+            background: rgba(31, 31, 31, 0.95);
+            border-bottom: 1px solid #9ca3af;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: sticky;
             top: 0;
+            z-index: 10;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand_logo {
+            filter: invert(1);
+            width: 28px;
+            height: 28px;
+        }
+        .header svg {
+            width: 24px;
+            height: 24px;
+            color: #9ca3af;
+            margin-right: 8px;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 24px;
+            max-width: 1280px;
+            margin: 0 auto;
             width: 100%;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px);
-            padding: 16px;
-            z-index: 50;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            color: white;
         }
         .card {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(250, 204, 21, 0.4);
-            border-radius: 24px;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(12px);
-            animation: scaleIn 0.8s ease-out;
-            max-width: 95%;
-            width: 1200px;
-            margin: 100px auto 20px;
-            position: relative;
-            z-index: 2;
-        }
-        @keyframes scaleIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
         .btn {
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-weight: 700;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            background: white;
-            color: #0a0a1b;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            background: #ffffff;
+            color: #000000;
         }
         .btn:hover:not(:disabled) {
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
-            background: #f8fafc;
+            background: #d1d5db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
         }
         .btn-danger {
-            background: white;
-            color: #ef4444;
+            background: #ff4d4f;
+            color: #ffffff;
         }
         .btn-danger:hover:not(:disabled) {
-            background: #f8fafc;
-            color: #dc2626;
+            background: #e6393a;
+        }
+        .sync-btn {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-weight: 500;
+            border: 1px solid #9ca3af;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .sync-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #d1d5db;
+        }
+        .sync-btn.spinning svg {
+            display: none;
         }
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-left: 4px solid #facc15;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-left: 3px solid #ffffff;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             animation: spin 0.8s linear infinite;
             display: none;
-            margin-left: 12px;
+            margin-left: 6px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         .error-message {
-            background: rgba(254, 226, 226, 0.9);
-            color: white;
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 16px;
+            background: rgba(255, 75, 75, 0.2);
+            color: #ff4d4f;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
             display: none;
-            position: relative;
-            animation: slideInRight 0.4s ease;
-        }
-        .error-message:hover::after {
-            content: 'Click to dismiss';
-            position: absolute;
-            top: -20px;
-            right: 12px;
-            font-size: 0.8rem;
-            color: white;
+            animation: fadeIn 0.4s ease;
         }
         .progress-bar {
-            height: 14px;
-            background: #e5e7eb;
-            border-radius: 7px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
             overflow: hidden;
         }
         .progress-bar-fill {
             height: 100%;
-            background: linear-gradient(to right, #facc15, #14b8a6);
+            background: #ffffff;
             transition: width 0.5s ease-in-out;
-            box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
         }
         .modal {
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(12px);
-            animation: scaleIn 0.4s ease;
+            background: rgba(0, 0, 0, 0.7);
+            animation: fadeIn 0.3s ease;
+            display: none;
+        }
+        .modal.show {
+            display: flex;
         }
         .modal-content {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(250, 204, 21, 0.4);
-            border-radius: 24px;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            max-width: 95%;
+            width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            color: #ffffff;
         }
         th, td {
-            padding: 18px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
         }
         th {
-            background: rgba(250, 204, 21, 0.2);
-            font-weight: 700;
-            color: white;
-            position: sticky;
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
             top: 0;
-            z-index: 10;
-        }
-        tr {
-            animation: fadeInRow 0.5s ease;
-        }
-        @keyframes fadeInRow {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            z-index: 5;
         }
         tr:hover {
             background: rgba(255, 255, 255, 0.05);
         }
-        .whatsapp-message {
-            background: #14b8a6;
-            border-radius: 12px;
-            max-width: 80%;
-            margin-left: auto;
-            padding: 12px 16px;
-            position: relative;
-            animation: slideInRight 0.5s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            overflow-wrap: break-word;
-            line-height: 1.5;
-            font-size: 0.9rem;
-        }
-        @keyframes slideInRight {
-            from { transform: translateX(50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .whatsapp-message::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: -10px;
-            border: 10px solid transparent;
-            border-bottom-color: #14b8a6;
-            border-right-color: #14b8a6;
-        }
-        .timestamp {
-            font-size: 0.75rem;
-            color: white;
-            text-align: right;
-            margin-top: 6px;
-        }
         .phone-mockup {
-            background: #0a0a1b;
-            border: 12px solid #1e293b;
-            border-radius: 52px;
-            width: 360px;
-            height: 640px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(250, 204, 21, 0.2);
+            background: #1f1f1f;
+            border: 6px solid #9ca3af;
+            border-radius: 24px;
+            width: 280px;
+            height: 520px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            margin: 0 auto;
             position: relative;
             overflow: hidden;
-            margin: 0 auto;
         }
         .phone-notch {
             position: absolute;
-            top: 10px;
+            top: 4px;
             left: 50%;
             transform: translateX(-50%);
-            width: 160px;
-            height: 24px;
-            background: #1e293b;
-            border-radius: 12px;
+            width: 90px;
+            height: 16px;
+            background: #9ca3af;
+            border-radius: 6px;
         }
         .phone-screen {
             width: 100%;
             height: 100%;
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKElEQVQYV2NkYGBgYGBkZGT8////f/8M0A8YGBgYGBl+/v7/AAADvCwnqC0B+2gAAAABJRU5ErkJggg==');
-            background-size: cover;
-            padding: 48px 16px 16px;
+            background: #000000;
+            padding: 32px 8px 8px;
             overflow-y: auto;
+            font-size: clamp(0.65rem, 2.2vw, 0.75rem);
+            line-height: 1.4;
+            color: #ffffff;
         }
         .status-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 16px;
-            background: #0a0a1b;
-            border-bottom: 1px solid rgba(250, 204, 21, 0.3);
+            padding: 4px 8px;
+            background: #1f1f1f;
+            border-bottom: 1px solid #9ca3af;
             position: absolute;
             top: 0;
             width: 100%;
-            color: white;
+        }
+        .whatsapp-message {
+            background: #ffffff;
+            color: #000000;
+            border-radius: 8px;
+            max-width: 80%;
+            margin-left: auto;
+            padding: 6px 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            font-size: clamp(0.65rem, 2.2vw, 0.75rem);
+        }
+        .timestamp {
+            font-size: clamp(0.55rem, 1.8vw, 0.65rem);
+            color: #9ca3af;
+            text-align: right;
+            margin-top: 3px;
         }
         .otp-timer {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            width: 48px;
+            height: 48px;
             position: relative;
             margin: 0 auto;
         }
@@ -263,199 +259,371 @@
         }
         .otp-timer circle {
             fill: none;
-            stroke: #facc15;
+            stroke: #ffffff;
             stroke-width: 3;
-            stroke-dasharray: 188;
+            stroke-dasharray: 150;
             stroke-dashoffset: 0;
             animation: countdown 30s linear forwards;
         }
         @keyframes countdown {
-            to { stroke-dashoffset: 188; }
+            to { stroke-dashoffset: 150; }
         }
         .otp-timer span {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 1.2rem;
-            color: white;
-            font-weight: 700;
+            font-size: 0.85rem;
+            color: #ffffff;
+            font-weight: 600;
         }
         .loading-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.7);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: fadeIn 0.3s ease;
         }
         .loading-spinner {
-            border: 5px solid rgba(255, 255, 255, 0.2);
-            border-left: 5px solid #facc15;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #ffffff;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
         }
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #1e293b;
-            color: white;
-            padding: 16px 32px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            bottom: 12px;
+            right: 12px;
+            background: #ffffff;
+            color: #000000;
+            padding: 10px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             display: none;
             z-index: 1000;
-            animation: toastSlideIn 0.3s ease;
         }
-        @keyframes toastSlideIn {
-            from { transform: translateX(150px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .input-field, .small-select {
+            padding: 8px;
+            border: 1px solid #9ca3af;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 100%;
+            color: #ffffff;
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .small-select {
+            background: #000000;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3e%3cpath d='M7 10l5 5 5-5H7z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            background-size: 10px;
+            max-width: 280px;
+        }
+        .input-field::placeholder {
+            color: #9ca3af;
+        }
+        .small-select:focus, .input-field:focus {
+            outline: none;
+            border-color: #d1d5db;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+        .file-input {
+            padding: 8px;
+            border: 1px solid #9ca3af;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 86%;
         }
         footer {
-            height: 50px;
-            background: linear-gradient(to right, #0f172a, #1e293b);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            animation: fadeIn 1.5s ease-in;
+            background: #1f1f1f;
+            padding: 12px;
+            text-align: center;
+            border-top: 1px solid #9ca3af;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 20px;
+            }
+            .card {
+                padding: 20px;
+            }
+            .modal-content {
+                width: 90%;
+                max-width: 800px;
+            }
+            .phone-mockup {
+                width: 260px;
+                height: 480px;
+                border-radius: 20px;
+            }
+            .phone-notch {
+                width: 80px;
+                height: 14px;
+            }
+        }
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 16px;
+            }
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            .brand_logo {
+                width: 24px;
+                height: 24px;
+            }
+            .main-content {
+                padding: 16px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .btn, .sync-btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+            .small-select {
+                max-width: 100%;
+            }
+            .phone-mockup {
+                width: 240px;
+                height: 440px;
+                border-radius: 18px;
+            }
+            .phone-notch {
+                width: 70px;
+                height: 12px;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 16px;
+                max-height: 75vh;
+            }
+            th, td {
+                padding: 8px;
+            }
+        }
+        @media (max-width: 640px) {
+            .header {
+                padding: 8px 12px;
+                flex-direction: row;
+                gap: 8px;
+            }
+            .header h1 {
+                font-size: 1.1rem;
+            }
+            .main-content {
+                padding: 12px;
+            }
+            .card {
+                padding: 12px;
+            }
+            .btn, .sync-btn {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+            .input-field, .small-select {
+                padding: 12px;
+                font-size: 0.8rem;
+            }
+            .phone-mockup {
+                width: 220px;
+                height: 400px;
+                border-radius: 16px;
+            }
+            .phone-notch {
+                width: 60px;
+                height: 10px;
+            }
+            table {
+                display: block;
+            }
+            thead {
+                display: none;
+            }
+            tr {
+                display: block;
+                margin-bottom: 0.75rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            td {
+                display: block;
+                text-align: left;
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                display: block;
+                color: #ffffff;
+            }
+            .modal-content {
+                width: 98%;
+                padding: 12px;
+                max-height: 70vh;
+            }
+        }
+        @media (max-width: 480px) {
+            .header {
+                padding: 6px 10px;
+            }
+            .header h1 {
+                font-size: 1rem;
+            }
+            .brand_logo {
+                width: 20px;
+                height: 20px;
+            }
+            .main-content {
+                padding: 10px;
+            }
+            .card {
+                padding: 10px;
+                border-radius: 8px;
+            }
+            .btn, .sync-btn {
+                padding: 6px 10px;
+                font-size: 0.7rem;
+            }
+            .input-field, .small-select {
+                padding: 12px;
+                font-size: 0.75rem;
+            }
+            .phone-mockup {
+                width: 200px;
+                height: 360px;
+                border-radius: 14px;
+            }
+            .phone-notch {
+                width: 50px;
+                height: 8px;
+            }
+            .phone-screen {
+                padding: 28px 6px 6px;
+                font-size: clamp(0.6rem, 2vw, 0.7rem);
+            }
+            .whatsapp-message {
+                padding: 5px 8px;
+                font-size: clamp(0.6rem, 2vw, 0.7rem);
+            }
+            .timestamp {
+                font-size: clamp(0.5rem, 1.5vw, 0.6rem);
+            }
+            .modal-content {
+                width: 100%;
+                padding: 10px;
+                max-height: 65vh;
+            }
+            th, td {
+                padding: 6px;
+                font-size: 0.75rem;
+            }
+        }
+        @media (max-width: 360px) {
+            .header {
+                padding: 5px 8px;
+            }
+            .header h1 {
+                font-size: 0.9rem;
+            }
+            .brand_logo {
+                width: 18px;
+                height: 18px;
+            }
+            .main-content {
+                padding: 8px;
+            }
+            .card {
+                padding: 8px;
+                border-radius: 6px;
+            }
+            .btn, .sync-btn {
+                padding: 5px 8px;
+                font-size: 0.65rem;
+            }
+            .input-field, .small-select {
+                padding: 4px;
+                font-size: 0.7rem;
+            }
+            .phone-mockup {
+                width: 180px;
+                height: 320px;
+                border-radius: 12px;
+            }
+            .phone-notch {
+                width: 40px;
+                height: 6px;
+            }
+            .modal-content {
+                width: 100%;
+                padding: 8px;
+                max-height: 60vh;
+            }
+            th, td {
+                padding: 5px;
+                font-size: 0.7rem;
+            }
+            .toast {
+                padding: 8px 16px;
+                font-size: 0.65rem;
+            }
         }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        .sync-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: white;
-            color: #0a0a1b;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            animation: none;
-            position: relative;
-        }
-        .sync-btn:hover:not(:disabled) {
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
-            background: #f8fafc;
-        }
-        .sync-btn.spinning {
-            animation: spin 1s linear infinite;
-        }
-        .sync-btn .spinner {
-            margin-left: 0;
-            position: absolute;
-        }
-        .sync-label {
-            font-size: 0.8rem;
-            color: white;
-            text-align: center;
-            margin-top: 4px;
-        }
-        .small-select {
-            max-width: 200px;
-            padding: 8px;
-            font-size: 0.9rem;
-            border-radius: 8px;
-            background: #1e293b;
-            color: white;
-            border: 1px solid rgba(250, 204, 21, 0.4);
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            position: relative;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5H7z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 12px;
-        }
-        .small-select:hover {
-            background-color: #334155;
-        }
-        .small-select:focus {
-            outline: none;
-            border-color: #facc15;
-            box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.4);
-        }
-        .small-select option {
-            background: #1e293b;
-            color: white;
-        }
-        @media (max-width: 640px) {
-            .card, .modal-content {
-                max-width: 98%;
-            }
-            table { display: block; }
-            thead { display: none; }
-            tr { display: block; margin-bottom: 1.5rem; }
-            td { display: block; text-align: left; }
-            td:before { content: attr(data-label); font-weight: 700; display: block; color: white; }
-            header { padding: 12px; }
-            .btn { padding: 12px 24px; }
-            .phone-mockup { width: 300px; height: 560px; border-radius: 44px; }
-            .phone-notch { width: 130px; height: 20px; }
-            .otp-timer { width: 50px; height: 50px; }
-            .otp-timer span { font-size: 1rem; }
-            .modal-content { padding: 6px; }
-            .btn { padding: 8px 16px; }
-            .small-select { max-width: 150px; font-size: 0.8rem; }
-            .sync-btn { width: 40px; height: 40px; }
-            .sync-btn svg { width: 20px; height: 20px; }
-            .sync-label { font-size: 0.7rem; }
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
         }
     </style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
-
-    <header>
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center">
-                <svg class="w-12 h-12 text-white mr-3" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.4-3 5h2c0-1.6 3-2 3-5 0-2.21-1.79-4-4-4z"/>
-                </svg>
-                <h1 class="text-3xl font-extrabold text-white" style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">TSC WhatsApp Template Initializer</h1>
-            </div>
-            <nav class="flex flex-col items-center">
-                <button id="syncBtn" class="sync-btn flex items-center justify-center" title="Sync from Architect Sheet">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-                    </svg>
-                    <span id="syncSpinner" class="spinner"></span>
-                </button>
-                <span class="sync-label">Sync from Architect Sheet</span>
-            </nav>
-        </div>
+    <canvas id="stars"></canvas>
+    <header class="header">
+        <h1>
+            <img class="brand_logo" src="squares.ico" alt="">
+            TSC Arcitect Notifier
+        </h1> 
+        <button id="syncBtn" class="sync-btn" title="Sync from Data Source">
+            <svg fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+            </svg>
+            Sync Data
+            <span id="syncSpinner" class="spinner"></span>
+        </button>
     </header>
 
-    <main class="flex-grow flex items-center justify-center py-12">
-        <div class="card p-12">
-            <h2 class="text-4xl font-extrabold text-white mb-10 text-center">WhatsApp Notification Sender</h2>
-            <div class="space-y-10">
+    <main class="main-content">
+        <div class="card">
+            <h2 class="text-lg font-semibold mb-4">Send WhatsApp Notifications</h2>
+            <p class="text-sm text-gray-400 mb-6">Streamline your partner communications with seamless WhatsApp notification management.</p>
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-white mb-3" for="templateSelect">Select Template</label>
-                    <select id="templateSelect" class="small-select block">
+                    <label class="block text-sm font-medium text-gray-300 mb-1" for="templateSelect">Select Notification Template</label>
+                    <select id="templateSelect" class="small-select">
                         <option value="architect_commission">Architect Commission Template</option>
                         <option value="template_2">Template 2</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-white mb-3" for="fileInput">Upload Excel File</label>
-                    <input type="file" id="fileInput" accept=".xlsx, .xls" class="block w-full text-sm text-white
-                        file:mr-4 file:py-4 file:px-8 file:rounded-lg file:border-0
-                        file:text-sm file:font-medium file:bg-white file:text-gray-900
-                        hover:file:bg-gray-100">
-                    <p id="fileValidation" class="text-sm text-white mt-3 hidden"></p>
+                    <label class="block text-sm font-medium text-gray-300 mb-1" for="fileInput">Upload Data File (Excel)</label>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" class="file-input">
+                    <p id="fileValidation" class="text-sm text-gray-400 mt-1 hidden"></p>
                 </div>
-                <div class="flex flex-wrap gap-6 justify-center">
+                <div class="flex flex-wrap gap-3">
                     <button id="previewBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
                         Preview Data
                         <span id="previewSpinner" class="spinner"></span>
@@ -465,102 +633,104 @@
                         <span id="messagesSpinner" class="spinner"></span>
                     </button>
                     <button id="sendAllBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
-                        Send Messages
+                        Send Notifications
                         <span id="sendSpinner" class="spinner"></span>
                     </button>
                 </div>
                 <div id="uploadError" class="error-message"></div>
-                <div id="progressContainer" class="mt-10 hidden">
-                    <p class="text-sm text-white mb-3">Sending Progress</p>
+                <div id="progressContainer" class="mt-4 hidden">
+                    <p class="text-sm text-gray-300 mb-1">Sending Progress</p>
                     <div class="progress-bar">
                         <div id="progressBarFill" class="progress-bar-fill" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
-            <div id="status" class="text-sm text-white text-center mt-10"></div>
+            <div id="status" class="text-sm text-gray-400 text-center mt-4"></div>
         </div>
     </main>
 
     <div id="previewModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="previewModalTitle" aria-modal="true">
-        <div class="modal-content p-12 max-w-5xl w-full max-h-[80vh] overflow-y-auto">
-            <h2 id="previewModalTitle" class="text-3xl font-extrabold text-white mb-10">Data Preview</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th scope="col">Phone Number</th>
-                        <th scope="col">Order ID</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">Issue Date</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-            <div class="flex justify-end mt-10">
+        <div class="modal-content">
+            <h2 id="previewModalTitle" class="text-lg font-semibold mb-4">Data Preview</h2>
+            <div style="padding-top: 40px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Issue Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+            <div class="flex justify-end mt-4">
                 <button id="closePreviewBtn" class="btn btn-danger">Close</button>
             </div>
         </div>
     </div>
 
     <div id="messageModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="messageModalTitle" aria-modal="true">
-        <div class="modal-content p-10 max-w-lg w-full">
-            <h2 id="messageModalTitle" class="text-3xl font-extrabold text-white mb-6 text-center">Message Preview</h2>
+        <div class="modal-content max-w-md">
+            <h2 id="messageModalTitle" class="text-lg font-semibold mb-4 text-center">Message Preview</h2>
             <div class="phone-mockup">
                 <div class="phone-notch"></div>
                 <div class="status-bar">
-                    <span class="text-sm text-white">12:00 PM</span>
+                    <span class="text-sm text-gray-400">12:00 PM</span>
                     <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M2 5h20v2H2zM2 9h16v2H2zM2 13h12v2H2z"/>
                         </svg>
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm6 9v-6h6v6h2v-8l-5-4-5 4v8h2z"/>
+                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm6 9$v-6h6v6h2v-8l-5-4-5 4v8h2z"/>
                         </svg>
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 18H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V6h12v6z"/>
                         </svg>
                     </div>
                 </div>
                 <div id="messageCards" class="phone-screen"></div>
             </div>
-            <div class="flex justify-center mt-6">
+            <div class="flex justify-center mt-4">
                 <button id="closeMessageBtn" class="btn btn-danger">Close</button>
             </div>
         </div>
     </div>
 
     <div id="template2Modal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="template2ModalTitle" aria-modal="true">
-        <div class="modal-content p-6 max-w-sm w-full">
-            <h2 id="template2ModalTitle" class="text-2xl font-bold text-white mb-4 text-center">Template 2</h2>
-            <p class="text-sm text-white mb-4 text-center">This template is under development.</p>
-            <div class="flex justify-center gap-4">
+        <div class="modal-content max-w-sm">
+            <h2 id="template2ModalTitle" class="text-lg font-semibold mb-4 text-center">Template 2</h2>
+            <p class="text-sm text-gray-400 mb-4 text-center">This template is currently under development.</p>
+            <div class="flex justify-center">
                 <button id="closeTemplate2Btn" class="btn btn-danger">Close</button>
             </div>
         </div>
     </div>
 
     <div id="confirmModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="confirmModalTitle" aria-modal="true">
-        <div class="modal-content p-6 max-w-sm w-full">
-            <h2 id="confirmModalTitle" class="text-2xl font-bold text-white mb-4 text-center">Confirm Sending</h2>
-            <p class="text-sm text-white mb-4 text-center">Enter the code below to confirm (<span id="timerDisplay">30</span>s):</p>
+        <div class="modal-content max-w-sm">
+            <h2 id="confirmModalTitle" class="text-lg font-semibold mb-4 text-center">Confirm Notification Sending</h2>
+            <p class="text-sm text-gray-400 mb-4 text-center">Enter the code below to confirm (<span id="timerDisplay">30</span>s):</p>
             <div class="otp-timer mb-4">
-                <svg width="60" height="60">
-                    <circle cx="30" cy="30" r="28" />
+                <svg width="48" height="48">
+                    <circle cx="24" cy="24" r="22" />
                 </svg>
                 <span id="timerText">30</span>
             </div>
-            <div class="flex items-center gap-3 mb-4">
-                <input type="text" id="generatedCode" readonly class="w-full p-3 border border-gray-300 rounded-lg text-gray-700 font-mono bg-white" value="" aria-label="Generated confirmation code">
+            <div class="flex items-center gap-2 mb-4">
+                <input type="text" id="generatedCode" readonly class="input-field font-mono" value="" aria-label="Generated confirmation code">
                 <button id="copyCodeBtn" class="btn text-sm">Copy</button>
             </div>
-            <input type="text" id="confirmCodeInput" maxlength="6" placeholder="Enter code" class="w-full p-3 border border-gray-300 rounded-lg mb-4 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Enter confirmation code">
-            <div class="flex justify-center gap-4 mb-4">
+            <input type="text" id="confirmCodeInput" maxlength="6" placeholder="Enter code" class="input-field" aria-label="Enter confirmation code">
+            <div class="flex justify-center gap-3 mt-4">
                 <button id="cancelConfirmBtn" class="btn btn-danger text-sm">Cancel</button>
                 <button id="submitConfirmBtn" class="btn flex items-center text-sm">
                     Confirm
                     <span id="confirmSpinner" class="spinner"></span>
                 </button>
             </div>
-            <p id="confirmStatus" class="text-sm text-white hidden text-center"></p>
+            <p id="confirmStatus" class="text-sm text-gray-400 hidden text-center"></p>
         </div>
     </div>
 
@@ -571,22 +741,42 @@
     <div id="toast" class="toast"></div>
 
     <footer>
-        <p class="text-lg font-bold text-white">Product by Abhishek Tiwari</p>
+        <p>© Product by Abhishek Tiwari D2C</p>
     </footer>
 
     <script>
         function createStars() {
-            const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 120; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.width = `${Math.random() * 3 + 1}px`;
-                star.style.height = star.style.width;
-                star.style.left = `${Math.random() * 100}vw`;
-                star.style.animationDuration = `${Math.random() * 8 + 8}s`;
-                star.style.animationDelay = `${Math.random() * 4}s`;
-                starsContainer.appendChild(star);
+            const canvas = document.getElementById('stars');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const stars = [];
+            for (let i = 0; i < 100; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    opacity: Math.random() * 0.5 + 0.2
+                });
             }
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(star => {
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                    ctx.fill();
+                    star.opacity += (Math.random() - 0.5) * 0.05;
+                    if (star.opacity > 1) star.opacity = 1;
+                    if (star.opacity < 0.2) star.opacity = 0.2;
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
         }
         createStars();
 
@@ -767,6 +957,7 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.add('hidden');
+                    modal.classList.remove('show');
                     if (modal === previewModal) tableBody.innerHTML = '';
                     if (modal === messageModal) messageCards.innerHTML = '';
                 }
@@ -837,6 +1028,7 @@
 
         closeTemplate2Btn.addEventListener('click', () => {
             template2Modal.classList.add('hidden');
+            template2Modal.classList.remove('show');
             showToast('Template 2 modal closed.');
         });
 
@@ -925,16 +1117,16 @@
         function populateTable() {
             tableBody.innerHTML = '';
             if (jsonData.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-white">No data available</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400">No data available</td></tr>';
                 return;
             }
             jsonData.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td data-label="Phone Number" class="text-white">${escapeHTML(row.phoneNo || 'N/A')}</td>
-                    <td data-label="Order ID" class="text-white">${escapeHTML(row.order_id || 'N/A')}</td>
-                    <td data-label="Amount" class="text-white">${escapeHTML(row.commissionAmount || 'N/A')}</td>
-                    <td data-label="Issue Date" class="text-white">${escapeHTML(row.commissionissueDate || 'N/A')}</td>
+                    <td data-label="Phone Number">${escapeHTML(row.phoneNo || 'N/A')}</td>
+                    <td data-label="Order ID">${escapeHTML(row.order_id || 'N/A')}</td>
+                    <td data-label="Amount">${escapeHTML(row.commissionAmount || 'N/A')}</td>
+                    <td data-label="Issue Date">${escapeHTML(row.commissionissueDate || 'N/A')}</td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -950,6 +1142,7 @@
             setTimeout(() => {
                 populateTable();
                 previewModal.classList.remove('hidden');
+                previewModal.classList.add('show');
                 previewSpinner.style.display = 'none';
                 showToast('Data preview opened.');
             }, 500);
@@ -964,6 +1157,7 @@
             const selectedTemplate = templateSelect.value;
             if (selectedTemplate === 'template_2') {
                 template2Modal.classList.remove('hidden');
+                template2Modal.classList.add('show');
                 showToast('Template 2 modal opened.');
                 return;
             }
@@ -973,16 +1167,16 @@
                 const row = jsonData[0];
                 const messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.commissionAmount || 'N/A')} is being processed for order(s) ${escapeHTML(row.order_id || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.commissionissueDate || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
                 const card = document.createElement('div');
-                card.className = 'p-4';
-                card.style.animation = `slideInRight 0.5s ease forwards`;
+                card.className = 'p-3';
                 card.innerHTML = `
                     <div class="whatsapp-message">
-                        <p class="text-sm text-white">${messageTemplate}</p>
+                        <p class="text-sm">${messageTemplate}</p>
                         <p class="timestamp">12:00 PM</p>
                     </div>
                 `;
                 messageCards.appendChild(card);
                 messageModal.classList.remove('hidden');
+                messageModal.classList.add('show');
                 messagesSpinner.style.display = 'none';
                 showToast('Message preview opened.');
             }, 500);
@@ -1061,12 +1255,14 @@
             const selectedTemplate = templateSelect.value;
             if (selectedTemplate === 'template_2') {
                 template2Modal.classList.remove('hidden');
+                template2Modal.classList.add('show');
                 showToast('Template 2 modal opened.');
                 return;
             }
             startOTPTimer();
             confirmModal.classList.remove('hidden');
-            showToast('Confirm message sending.');
+            confirmModal.classList.add('show');
+            showToast('Confirm notification sending.');
         });
 
         submitConfirmBtn.addEventListener('click', async () => {
@@ -1087,7 +1283,8 @@
             confirmSpinner.style.display = 'inline-block';
             sendSpinner.style.display = 'inline-block';
             confirmModal.classList.add('hidden');
-            statusDiv.textContent = `Sending ${jsonData.length} messages...`;
+            confirmModal.classList.remove('show');
+            statusDiv.textContent = `Sending ${jsonData.length} notifications...`;
             progressContainer.classList.remove('hidden');
             progressBarFill.style.width = '0%';
 
@@ -1109,7 +1306,7 @@
             sendSpinner.style.display = 'none';
             progressContainer.classList.add('hidden');
 
-            let statusMessage = `Messages sent: ${successCount} successful, ${errorCount} failed.`;
+            let statusMessage = `Notifications sent: ${successCount} successful, ${errorCount} failed.`;
             if (errorCount > 0) {
                 statusMessage += ` Failed rows: ${failedRows.map(r => `Row ${r.rowIndex} (${r.phoneNo || 'N/A'}): ${r.error}`).join('; ')}.`;
                 statusMessage += ' <button id="downloadFailedBtn" class="btn">Download Failed Rows</button>';
@@ -1121,25 +1318,34 @@
                     downloadFailedRows(failedRows);
                 });
             }
-            showToast(`Messages sent: ${successCount} successful, ${errorCount} failed.`);
+            showToast(`Notifications sent: ${successCount} successful, ${errorCount} failed.`);
         });
 
         cancelConfirmBtn.addEventListener('click', () => {
             confirmModal.classList.add('hidden');
-            statusDiv.textContent = 'Message sending cancelled.';
-            showToast('Message sending cancelled.');
+            confirmModal.classList.remove('show');
+            statusDiv.textContent = 'Notification sending cancelled.';
+            showToast('Notification sending cancelled.');
         });
 
         closePreviewBtn.addEventListener('click', () => {
             previewModal.classList.add('hidden');
+            previewModal.classList.remove('show');
             tableBody.innerHTML = '';
             showToast('Data preview closed.');
         });
 
         closeMessageBtn.addEventListener('click', () => {
             messageModal.classList.add('hidden');
+            messageModal.classList.remove('show');
             messageCards.innerHTML = '';
             showToast('Message preview closed.');
+        });
+
+        closeTemplate2Btn.addEventListener('click', () => {
+            template2Modal.classList.add('hidden');
+            template2Modal.classList.remove('show');
+            showToast('Template 2 modal closed.');
         });
 
         uploadError.addEventListener('click', () => {
