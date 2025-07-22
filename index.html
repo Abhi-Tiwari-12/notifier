@@ -756,7 +756,7 @@
 
             previewBtn.disabled = false;
             viewMessagesBtn.disabled = false;
-            sendAllBtn.disabled = true; // Disable send button until data is confirmed
+            sendAllBtn.disabled = false; // Enable send button after successful validation
             statusDiv.textContent = `Data ${isFromAPI ? 'synced' : 'loaded'} successfully. ${jsonData.length} records found.`;
             loadingOverlay.style.display = 'none';
             showToast(isFromAPI ? 'Data synced successfully!' : 'File uploaded successfully!');
