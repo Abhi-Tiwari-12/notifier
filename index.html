@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSC WhatsApp Template Initializer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: #0a0a1b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            overflow-x: hidden;
+            color: white;
+        }
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .star {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 4s infinite, moveStar 15s linear infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        @keyframes moveStar {
+            0% { transform: translateX(0) translateY(100vh); }
+            100% { transform: translateX(-30vw) translateY(-100vh); }
+        }
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 16px;
+            z-index: 50;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(250, 204, 21, 0.4);
+            border-radius: 24px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            animation: scaleIn 0.8s ease-out;
+            max-width: 95%;
+            width: 1200px;
+            margin: 100px auto 20px;
+            position: relative;
+            z-index: 2;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .btn {
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: white;
+            color: #0a0a1b;
+        }
+        .btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
+            background: #f8fafc;
+        }
+        .btn-danger {
+            background: white;
+            color: #ef4444;
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: #f8fafc;
+            color: #dc2626;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-left: 4px solid #facc15;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+            display: none;
+            margin-left: 12px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: rgba(254, 226, 226, 0.9);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 16px;
+            display: none;
+            position: relative;
+            animation: slideInRight 0.4s ease;
+        }
+        .error-message:hover::after {
+            content: 'Click to dismiss';
+            position: absolute;
+            top: -20px;
+            right: 12px;
+            font-size: 0.8rem;
+            color: white;
+        }
+        .progress-bar {
+            height: 14px;
+            background: #e5e7eb;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, #facc15, #14b8a6);
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .modal {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(12px);
+            animation: scaleIn 0.4s ease;
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(250, 204, 21, 0.4);
+            border-radius: 24px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        th {
+            background: rgba(250, 204, 21, 0.2);
+            font-weight: 700;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr {
+            animation: fadeInRow 0.5s ease;
+        }
+        @keyframes fadeInRow {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .whatsapp-message {
+            background: #14b8a6;
+            border-radius: 12px;
+            max-width: 80%;
+            margin-left: auto;
+            padding: 12px 16px;
+            position: relative;
+            animation: slideInRight 0.5s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow-wrap: break-word;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .whatsapp-message::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: -10px;
+            border: 10px solid transparent;
+            border-bottom-color: #14b8a6;
+            border-right-color: #14b8a6;
+        }
+        .timestamp {
+            font-size: 0.75rem;
+            color: white;
+            text-align: right;
+            margin-top: 6px;
+        }
+        .phone-mockup {
+            background: #0a0a1b;
+            border: 12px solid #1e293b;
+            border-radius: 52px;
+            width: 360px;
+            height: 640px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(250, 204, 21, 0.2);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 24px;
+            background: #1e293b;
+            border-radius: 12px;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAKElEQVQYV2NkYGBgYGBkZGT8////f/8M0A8YGBgYGBl+/v7/AAADvCwnqC0B+2gAAAABJRU5ErkJggg==');
+            background-size: cover;
+            padding: 48px 16px 16px;
+            overflow-y: auto;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: #0a0a1b;
+            border-bottom: 1px solid rgba(250, 204, 21, 0.3);
+            position: absolute;
+            top: 0;
+            width: 100%;
+            color: white;
+        }
+        .otp-timer {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+        }
+        .otp-timer svg {
+            transform: rotate(-90deg);
+        }
+        .otp-timer circle {
+            fill: none;
+            stroke: #facc15;
+            stroke-width: 3;
+            stroke-dasharray: 188;
+            stroke-dashoffset: 0;
+            animation: countdown 30s linear forwards;
+        }
+        @keyframes countdown {
+            to { stroke-dashoffset: 188; }
+        }
+        .otp-timer span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: white;
+            font-weight: 700;
+        }
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        .loading-spinner {
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-left: 5px solid #facc15;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            animation: toastSlideIn 0.3s ease;
+        }
+        @keyframes toastSlideIn {
+            from { transform: translateX(150px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        footer {
+            height: 50px;
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            animation: fadeIn 1.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .sync-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            color: #0a0a1b;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: none;
+            position: relative;
+        }
+        .sync-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
+            background: #f8fafc;
+        }
+        .sync-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+        .sync-btn .spinner {
+            margin-left: 0;
+            position: absolute;
+        }
+        .sync-label {
+            font-size: 0.8rem;
+            color: white;
+            text-align: center;
+            margin-top: 4px;
+        }
+        .small-select {
+            max-width: 200px;
+            padding: 8px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            background: #1e293b;
+            color: white;
+            border: 1px solid rgba(250, 204, 21, 0.4);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            position: relative;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5H7z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+        }
+        .small-select:hover {
+            background-color: #334155;
+        }
+        .small-select:focus {
+            outline: none;
+            border-color: #facc15;
+            box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.4);
+        }
+        .small-select option {
+            background: #1e293b;
+            color: white;
+        }
+        @media (max-width: 640px) {
+            .card, .modal-content {
+                max-width: 98%;
+            }
+            table { display: block; }
+            thead { display: none; }
+            tr { display: block; margin-bottom: 1.5rem; }
+            td { display: block; text-align: left; }
+            td:before { content: attr(data-label); font-weight: 700; display: block; color: white; }
+            header { padding: 12px; }
+            .btn { padding: 12px 24px; }
+            .phone-mockup { width: 300px; height: 560px; border-radius: 44px; }
+            .phone-notch { width: 130px; height: 20px; }
+            .otp-timer { width: 50px; height: 50px; }
+            .otp-timer span { font-size: 1rem; }
+            .modal-content { padding: 6px; }
+            .btn { padding: 8px 16px; }
+            .small-select { max-width: 150px; font-size: 0.8rem; }
+            .sync-btn { width: 40px; height: 40px; }
+            .sync-btn svg { width: 20px; height: 20px; }
+            .sync-label { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-12 h-12 text-white mr-3" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.4-3 5h2c0-1.6 3-2 3-5 0-2.21-1.79-4-4-4z"/>
+                </svg>
+                <h1 class="text-3xl font-extrabold text-white" style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">TSC WhatsApp Template Initializer</h1>
+            </div>
+            <nav class="flex flex-col items-center">
+                <button id="syncBtn" class="sync-btn flex items-center justify-center" title="Sync from Architect Sheet">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                    </svg>
+                    <span id="syncSpinner" class="spinner"></span>
+                </button>
+                <span class="sync-label">Sync from Architect Sheet</span>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center py-12">
+        <div class="card p-12">
+            <h2 class="text-4xl font-extrabold text-white mb-10 text-center">WhatsApp Notification Sender</h2>
+            <div class="space-y-10">
+                <div>
+                    <label class="block text-sm font-medium text-white mb-3" for="templateSelect">Select Template</label>
+                    <select id="templateSelect" class="small-select block">
+                        <option value="architect_commission">Architect Commission Template</option>
+                        <option value="template_2">Template 2</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white mb-3" for="fileInput">Upload Excel File</label>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" class="block w-full text-sm text-white
+                        file:mr-4 file:py-4 file:px-8 file:rounded-lg file:border-0
+                        file:text-sm file:font-medium file:bg-white file:text-gray-900
+                        hover:file:bg-gray-100">
+                    <p id="fileValidation" class="text-sm text-white mt-3 hidden"></p>
+                </div>
+                <div class="flex flex-wrap gap-6 justify-center">
+                    <button id="previewBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
+                        Preview Data
+                        <span id="previewSpinner" class="spinner"></span>
+                    </button>
+                    <button id="viewMessagesBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
+                        View Message
+                        <span id="messagesSpinner" class="spinner"></span>
+                    </button>
+                    <button id="sendAllBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
+                        Send Messages
+                        <span id="sendSpinner" class="spinner"></span>
+                    </button>
+                </div>
+                <div id="uploadError" class="error-message"></div>
+                <div id="progressContainer" class="mt-10 hidden">
+                    <p class="text-sm text-white mb-3">Sending Progress</p>
+                    <div class="progress-bar">
+                        <div id="progressBarFill" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="status" class="text-sm text-white text-center mt-10"></div>
+        </div>
+    </main>
+
+    <div id="previewModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="previewModalTitle" aria-modal="true">
+        <div class="modal-content p-12 max-w-5xl w-full max-h-[80vh] overflow-y-auto">
+            <h2 id="previewModalTitle" class="text-3xl font-extrabold text-white mb-10">Data Preview</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Phone Number</th>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Issue Date</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div class="flex justify-end mt-10">
+                <button id="closePreviewBtn" class="btn btn-danger">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="messageModalTitle" aria-modal="true">
+        <div class="modal-content p-10 max-w-lg w-full">
+            <h2 id="messageModalTitle" class="text-3xl font-extrabold text-white mb-6 text-center">Message Preview</h2>
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="status-bar">
+                    <span class="text-sm text-white">12:00 PM</span>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M2 5h20v2H2zM2 9h16v2H2zM2 13h12v2H2z"/>
+                        </svg>
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm6 9v-6h6v6h2v-8l-5-4-5 4v8h2z"/>
+                        </svg>
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 18H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V6h12v6z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="messageCards" class="phone-screen"></div>
+            </div>
+            <div class="flex justify-center mt-6">
+                <button id="closeMessageBtn" class="btn btn-danger">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="template2Modal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="template2ModalTitle" aria-modal="true">
+        <div class="modal-content p-6 max-w-sm w-full">
+            <h2 id="template2ModalTitle" class="text-2xl font-bold text-white mb-4 text-center">Template 2</h2>
+            <p class="text-sm text-white mb-4 text-center">This template is under development.</p>
+            <div class="flex justify-center gap-4">
+                <button id="closeTemplate2Btn" class="btn btn-danger">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="confirmModalTitle" aria-modal="true">
+        <div class="modal-content p-6 max-w-sm w-full">
+            <h2 id="confirmModalTitle" class="text-2xl font-bold text-white mb-4 text-center">Confirm Sending</h2>
+            <p class="text-sm text-white mb-4 text-center">Enter the code below to confirm (<span id="timerDisplay">30</span>s):</p>
+            <div class="otp-timer mb-4">
+                <svg width="60" height="60">
+                    <circle cx="30" cy="30" r="28" />
+                </svg>
+                <span id="timerText">30</span>
+            </div>
+            <div class="flex items-center gap-3 mb-4">
+                <input type="text" id="generatedCode" readonly class="w-full p-3 border border-gray-300 rounded-lg text-gray-700 font-mono bg-white" value="" aria-label="Generated confirmation code">
+                <button id="copyCodeBtn" class="btn text-sm">Copy</button>
+            </div>
+            <input type="text" id="confirmCodeInput" maxlength="6" placeholder="Enter code" class="w-full p-3 border border-gray-300 rounded-lg mb-4 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Enter confirmation code">
+            <div class="flex justify-center gap-4 mb-4">
+                <button id="cancelConfirmBtn" class="btn btn-danger text-sm">Cancel</button>
+                <button id="submitConfirmBtn" class="btn flex items-center text-sm">
+                    Confirm
+                    <span id="confirmSpinner" class="spinner"></span>
+                </button>
+            </div>
+            <p id="confirmStatus" class="text-sm text-white hidden text-center"></p>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <footer>
+        <p class="text-lg font-bold text-white">Product by Abhishek Tiwari</p>
+    </footer>
+
+    <script>
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 120; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.animationDuration = `${Math.random() * 8 + 8}s`;
+                star.style.animationDelay = `${Math.random() * 4}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+
+        const API_URL = 'https://d3cu187wy0.execute-api.ap-south-1.amazonaws.com/dev/sendwhatsapp';
+        const GOOGLE_SHEET_API = 'https://script.google.com/macros/s/AKfycby7FqEEpRDBtoPELVcMnfRHjTuqFIJdgELuP_LhJ5OgOhniyNP8hcnGQ7zOC-g5HpFC/exec';
+        const API_TOKEN = 'ckfVh0Mq2h6VOj2Rixw3n47rclh4fGKz1AQ2uMol';
+        const BATCH_SIZE = 10;
+
+        const fileInput = document.getElementById('fileInput');
+        const templateSelect = document.getElementById('templateSelect');
+        const previewBtn = document.getElementById('previewBtn');
+        const viewMessagesBtn = document.getElementById('viewMessagesBtn');
+        const sendAllBtn = document.getElementById('sendAllBtn');
+        const tableBody = document.getElementById('tableBody');
+        const statusDiv = document.getElementById('status');
+        const uploadError = document.getElementById('uploadError');
+        const previewModal = document.getElementById('previewModal');
+        const messageModal = document.getElementById('messageModal');
+        const template2Modal = document.getElementById('template2Modal');
+        const confirmModal = document.getElementById('confirmModal');
+        const messageCards = document.getElementById('messageCards');
+        const closePreviewBtn = document.getElementById('closePreviewBtn');
+        const closeMessageBtn = document.getElementById('closeMessageBtn');
+        const closeTemplate2Btn = document.getElementById('closeTemplate2Btn');
+        const syncBtn = document.getElementById('syncBtn');
+        const syncSpinner = document.getElementById('syncSpinner');
+        const generatedCodeInput = document.getElementById('generatedCode');
+        const confirmCodeInput = document.getElementById('confirmCodeInput');
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+        const submitConfirmBtn = document.getElementById('submitConfirmBtn');
+        const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+        const confirmStatus = document.getElementById('confirmStatus');
+        const previewSpinner = document.getElementById('previewSpinner');
+        const messagesSpinner = document.getElementById('messagesSpinner');
+        const sendSpinner = document.getElementById('sendSpinner');
+        const confirmSpinner = document.getElementById('confirmSpinner');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const toast = document.getElementById('toast');
+        const fileValidation = document.getElementById('fileValidation');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerText = document.getElementById('timerText');
+        let jsonData = [];
+        let confirmationCode = '';
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function isValidPhoneNumber(phone) {
+            return /^\+?\d{10,15}$/.test(phone);
+        }
+
+        function normalizeDate(dateStr) {
+            if (!dateStr) return new Date().toLocaleDateString('en-GB').replace(/\//g, '/');
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
+                return dateStr.replace(/-/g, '/').trim();
+            }
+            return date.toLocaleDateString('en-GB').replace(/\//g, '/');
+        }
+
+        function cleanCommissionAmount(amount) {
+            return amount?.toString().trim().replace(/,/g, '') || '';
+        }
+
+        function generateConfirmationCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function showToast(message, duration = 3000) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        function startOTPTimer() {
+            confirmCodeInput.value = '';
+            confirmStatus.classList.add('hidden');
+            confirmationCode = generateConfirmationCode();
+            generatedCodeInput.value = confirmationCode;
+            let timeLeft = 30;
+            timerDisplay.textContent = timeLeft;
+            timerText.textContent = timeLeft;
+            const timerCircle = document.querySelector('.otp-timer circle');
+            timerCircle.style.animation = 'none';
+            void timerCircle.offsetWidth;
+            timerCircle.style.animation = 'countdown 30s linear forwards';
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                timerText.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (!confirmModal.classList.contains('hidden')) {
+                        confirmStatus.textContent = 'Code expired. Please upload the file again to generate a new code.';
+                        confirmStatus.classList.remove('hidden');
+                        showToast('Confirmation code expired.');
+                    }
+                }
+            }, 1000);
+            setTimeout(() => {
+                clearInterval(timerInterval);
+            }, 30000);
+        }
+
+        async function validateAndProcessData(data, isFromAPI = false) {
+            const requiredColumns = ['phoneNo', 'order_id', 'commissionAmount'];
+            const headers = data.length > 0 ? Object.keys(data[0]) : [];
+            const missingColumns = requiredColumns.filter(col => !headers.includes(col));
+            if (missingColumns.length > 0) {
+                uploadError.textContent = `Error: Missing required columns: ${missingColumns.join(', ')}. Expected: phoneNo, order_id, commissionAmount.`;
+                uploadError.style.display = 'block';
+                statusDiv.textContent = '';
+                previewBtn.disabled = true;
+                viewMessagesBtn.disabled = true;
+                sendAllBtn.disabled = true;
+                jsonData = [];
+                loadingOverlay.style.display = 'none';
+                showToast(isFromAPI ? 'Missing required columns in API data.' : 'Missing required columns.');
+                return false;
+            }
+
+            jsonData = data.map((row, index) => ({
+                phoneNo: row.phoneNo?.toString().trim() || '',
+                order_id: row.order_id?.toString().trim() || '',
+                commissionAmount: cleanCommissionAmount(row.commissionAmount),
+                commissionissueDate: normalizeDate(row.commissionissueDate),
+                rowIndex: index + 2
+            }));
+
+            const invalidPhones = jsonData.filter(row => !isValidPhoneNumber(row.phoneNo));
+            if (invalidPhones.length > 0) {
+                uploadError.textContent = `Error: Invalid phone numbers in rows: ${invalidPhones.map(r => r.rowIndex).join(', ')}. Ensure all phone numbers are 10-15 digits with optional + prefix.`;
+                uploadError.style.display = 'block';
+                statusDiv.textContent = '';
+                previewBtn.disabled = true;
+                viewMessagesBtn.disabled = true;
+                sendAllBtn.disabled = true;
+                jsonData = [];
+                loadingOverlay.style.display = 'none';
+                showToast(isFromAPI ? 'Invalid phone numbers in API data.' : 'Invalid phone numbers detected.');
+                return false;
+            }
+
+            if (jsonData.length === 0) {
+                uploadError.textContent = `Error: No valid data found in the ${isFromAPI ? 'API response' : 'file'}.`;
+                uploadError.style.display = 'block';
+                statusDiv.textContent = '';
+                previewBtn.disabled = true;
+                viewMessagesBtn.disabled = true;
+                sendAllBtn.disabled = true;
+                loadingOverlay.style.display = 'none';
+                showToast(isFromAPI ? 'No valid data in API response.' : 'No valid data found.');
+                return false;
+            }
+
+            previewBtn.disabled = false;
+            viewMessagesBtn.disabled = false;
+            sendAllBtn.disabled = false;
+            statusDiv.textContent = `Data ${isFromAPI ? 'synced' : 'loaded'} successfully. ${jsonData.length} records found.`;
+            loadingOverlay.style.display = 'none';
+            showToast(isFromAPI ? 'Data synced successfully!' : 'File uploaded successfully!');
+            return true;
+        }
+
+        [previewModal, messageModal, confirmModal, template2Modal].forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                    if (modal === previewModal) tableBody.innerHTML = '';
+                    if (modal === messageModal) messageCards.innerHTML = '';
+                }
+            });
+        });
+
+        copyCodeBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(generatedCodeInput.value).then(() => {
+                copyCodeBtn.textContent = 'Copied!';
+                showToast('Confirmation code copied!');
+                setTimeout(() => {
+                    copyCodeBtn.textContent = 'Copy';
+                }, 2000);
+            });
+        });
+
+        syncBtn.addEventListener('click', async () => {
+            syncBtn.classList.add('spinning');
+            syncSpinner.style.display = 'inline-block';
+            syncBtn.querySelector('svg').style.display = 'none';
+            statusDiv.textContent = 'Syncing data from Architect Sheet...';
+            uploadError.style.display = 'none';
+            fileInput.value = ''; // Clear file input to ensure API data takes precedence
+            loadingOverlay.style.display = 'flex';
+
+            try {
+                const response = await fetch(GOOGLE_SHEET_API, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: AbortSignal.timeout(10000)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`API error (status ${response.status}): ${errorData.message || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid API response: Expected an array of objects.');
+                }
+
+                // Process data exactly like file upload
+                const isValid = await validateAndProcessData(data, true);
+                if (isValid) {
+                    // Ensure message preview uses the synced data
+                    viewMessagesBtn.disabled = false;
+                    previewBtn.disabled = false;
+                    sendAllBtn.disabled = false;
+                    fileValidation.classList.add('hidden'); // Clear any file validation messages
+                }
+            } catch (error) {
+                uploadError.textContent = `Error syncing data: ${error.message}`;
+                uploadError.style.display = 'block';
+                statusDiv.textContent = '';
+                previewBtn.disabled = true;
+                viewMessagesBtn.disabled = true;
+                sendAllBtn.disabled = true;
+                jsonData = [];
+                loadingOverlay.style.display = 'none';
+                showToast(`Error syncing data: ${error.message}`);
+            } finally {
+                syncBtn.classList.remove('spinning');
+                syncSpinner.style.display = 'none';
+                syncBtn.querySelector('svg').style.display = 'block';
+            }
+        });
+
+        closeTemplate2Btn.addEventListener('click', () => {
+            template2Modal.classList.add('hidden');
+            showToast('Template 2 modal closed.');
+        });
+
+        async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: AbortSignal.timeout(10000)
+                    });
+                    return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                }
+            }
+        }
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) {
+                uploadError.textContent = 'No file selected. Please choose an Excel file.';
+                uploadError.style.display = 'block';
+                fileValidation.textContent = 'No file selected.';
+                fileValidation.classList.remove('hidden');
+                statusDiv.textContent = '';
+                previewBtn.disabled = true;
+                viewMessagesBtn.disabled = true;
+                sendAllBtn.disabled = true;
+                showToast('No file selected.');
+                return;
+            }
+
+            if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+                uploadError.textContent = 'Invalid file format. Please upload an Excel file (.xlsx or .xls).';
+                uploadError.style.display = 'block';
+                fileValidation.textContent = 'Invalid file format.';
+                fileValidation.classList.remove('hidden');
+                statusDiv.textContent = '';
+                previewBtn.disabled = true;
+                viewMessagesBtn.disabled = true;
+                sendAllBtn.disabled = true;
+                showToast('Invalid file format.');
+                return;
+            }
+
+            fileValidation.classList.add('hidden');
+            statusDiv.textContent = 'Processing file...';
+            uploadError.style.display = 'none';
+            loadingOverlay.style.display = 'flex';
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false, blankrows: false });
+                    await validateAndProcessData(json, false);
+                } catch (error) {
+                    uploadError.textContent = 'Error reading file: ' + error.message;
+                    uploadError.style.display = 'block';
+                    statusDiv.textContent = '';
+                    previewBtn.disabled = true;
+                    viewMessagesBtn.disabled = true;
+                    sendAllBtn.disabled = true;
+                    jsonData = [];
+                    loadingOverlay.style.display = 'none';
+                    showToast('Error reading file.');
+                }
+            };
+            reader.onerror = () => {
+                uploadError.textContent = 'Error reading file. Please try again.';
+                uploadError.style.display = 'block';
+                statusDiv.textContent = '';
+                previewBtn.disabled = true;
+                viewMessagesBtn.disabled = true;
+                sendAllBtn.disabled = true;
+                jsonData = [];
+                loadingOverlay.style.display = 'none';
+                showToast('Error reading file.');
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function populateTable() {
+            tableBody.innerHTML = '';
+            if (jsonData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-white">No data available</td></tr>';
+                return;
+            }
+            jsonData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="Phone Number" class="text-white">${escapeHTML(row.phoneNo || 'N/A')}</td>
+                    <td data-label="Order ID" class="text-white">${escapeHTML(row.order_id || 'N/A')}</td>
+                    <td data-label="Amount" class="text-white">${escapeHTML(row.commissionAmount || 'N/A')}</td>
+                    <td data-label="Issue Date" class="text-white">${escapeHTML(row.commissionissueDate || 'N/A')}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        previewBtn.addEventListener('click', () => {
+            if (jsonData.length === 0) {
+                statusDiv.textContent = 'No data to display. Please upload a valid Excel file or sync data.';
+                showToast('No data to display.');
+                return;
+            }
+            previewSpinner.style.display = 'inline-block';
+            setTimeout(() => {
+                populateTable();
+                previewModal.classList.remove('hidden');
+                previewSpinner.style.display = 'none';
+                showToast('Data preview opened.');
+            }, 500);
+        });
+
+        viewMessagesBtn.addEventListener('click', () => {
+            if (jsonData.length === 0) {
+                statusDiv.textContent = 'No data to display. Please upload a valid Excel file or sync data.';
+                showToast('No data to display.');
+                return;
+            }
+            const selectedTemplate = templateSelect.value;
+            if (selectedTemplate === 'template_2') {
+                template2Modal.classList.remove('hidden');
+                showToast('Template 2 modal opened.');
+                return;
+            }
+            messagesSpinner.style.display = 'inline-block';
+            setTimeout(() => {
+                messageCards.innerHTML = '';
+                const row = jsonData[0];
+                const messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.commissionAmount || 'N/A')} is being processed for order(s) ${escapeHTML(row.order_id || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.commissionissueDate || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
+                const card = document.createElement('div');
+                card.className = 'p-4';
+                card.style.animation = `slideInRight 0.5s ease forwards`;
+                card.innerHTML = `
+                    <div class="whatsapp-message">
+                        <p class="text-sm text-white">${messageTemplate}</p>
+                        <p class="timestamp">12:00 PM</p>
+                    </div>
+                `;
+                messageCards.appendChild(card);
+                messageModal.classList.remove('hidden');
+                messagesSpinner.style.display = 'none';
+                showToast('Message preview opened.');
+            }, 500);
+        });
+
+        function downloadFailedRows(failedRows) {
+            if (failedRows.length === 0) return;
+            const csv = [
+                'Row,Phone,OrderID,CommissionAmount,CommissionIssueDate,Error',
+                ...failedRows.map(r => `${r.rowIndex},${r.phoneNo || ''},${r.order_id || ''},${r.commissionAmount || ''},${r.commissionissueDate || ''},${r.error.replace(/,/g, '')}`)
+            ].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'failed_messages.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Failed rows downloaded.');
+        }
+
+        async function sendMessageBatch(batch) {
+            const selectedTemplate = templateSelect.value;
+            const failedRows = [];
+            const promises = batch.map(async (row) => {
+                const payload = {
+                    template_attributes: {
+                        templateName: selectedTemplate,
+                        phoneNo: row.phoneNo,
+                        order_id: row.order_id,
+                        commissionissueDate: row.commissionissueDate,
+                        commissionAmount: row.commissionAmount
+                    }
+                };
+                try {
+                    const response = await fetchWithRetry(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': API_TOKEN
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        return { success: true };
+                    } else {
+                        return { success: false, error: `API error (status ${response.status})`, row };
+                    }
+                } catch (error) {
+                    return { success: false, error: error.message, row };
+                }
+            });
+
+            const results = await Promise.all(promises);
+            results.forEach(result => {
+                if (!result.success) {
+                    failedRows.push({
+                        rowIndex: result.row.rowIndex,
+                        phoneNo: result.row.phoneNo,
+                        order_id: result.row.order_id,
+                        commissionAmount: result.row.commissionAmount,
+                        commissionissueDate: result.row.commissionissueDate,
+                        error: result.error
+                    });
+                }
+            });
+            return { successCount: results.filter(r => r.success).length, failedRows };
+        }
+
+        sendAllBtn.addEventListener('click', async () => {
+            if (jsonData.length === 0) {
+                statusDiv.textContent = 'No data to send. Please upload a valid Excel file or sync data.';
+                showToast('No data to send.');
+                return;
+            }
+            const selectedTemplate = templateSelect.value;
+            if (selectedTemplate === 'template_2') {
+                template2Modal.classList.remove('hidden');
+                showToast('Template 2 modal opened.');
+                return;
+            }
+            startOTPTimer();
+            confirmModal.classList.remove('hidden');
+            showToast('Confirm message sending.');
+        });
+
+        submitConfirmBtn.addEventListener('click', async () => {
+            const enteredCode = confirmCodeInput.value.trim().toUpperCase();
+            if (enteredCode.length !== 6) {
+                confirmStatus.textContent = 'Please enter a valid 6-character code.';
+                confirmStatus.classList.remove('hidden');
+                showToast('Invalid confirmation code.');
+                return;
+            }
+            if (enteredCode !== confirmationCode) {
+                confirmStatus.textContent = 'Incorrect code. Please copy and paste the code above.';
+                confirmStatus.classList.remove('hidden');
+                showToast('Incorrect confirmation code.');
+                return;
+            }
+
+            confirmSpinner.style.display = 'inline-block';
+            sendSpinner.style.display = 'inline-block';
+            confirmModal.classList.add('hidden');
+            statusDiv.textContent = `Sending ${jsonData.length} messages...`;
+            progressContainer.classList.remove('hidden');
+            progressBarFill.style.width = '0%';
+
+            let successCount = 0;
+            let errorCount = 0;
+            const failedRows = [];
+
+            for (let i = 0; i < jsonData.length; i += BATCH_SIZE) {
+                const batch = jsonData.slice(i, i + BATCH_SIZE);
+                const { successCount: batchSuccess, failedRows: batchFailed } = await sendMessageBatch(batch);
+                successCount += batchSuccess;
+                errorCount += batchFailed.length;
+                failedRows.push(...batchFailed);
+                progressBarFill.style.width = `${Math.min(((i + batch.length) / jsonData.length) * 100, 100)}%`;
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            confirmSpinner.style.display = 'none';
+            sendSpinner.style.display = 'none';
+            progressContainer.classList.add('hidden');
+
+            let statusMessage = `Messages sent: ${successCount} successful, ${errorCount} failed.`;
+            if (errorCount > 0) {
+                statusMessage += ` Failed rows: ${failedRows.map(r => `Row ${r.rowIndex} (${r.phoneNo || 'N/A'}): ${r.error}`).join('; ')}.`;
+                statusMessage += ' <button id="downloadFailedBtn" class="btn">Download Failed Rows</button>';
+            }
+            statusDiv.innerHTML = statusMessage;
+
+            if (errorCount > 0) {
+                document.getElementById('downloadFailedBtn').addEventListener('click', () => {
+                    downloadFailedRows(failedRows);
+                });
+            }
+            showToast(`Messages sent: ${successCount} successful, ${errorCount} failed.`);
+        });
+
+        cancelConfirmBtn.addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
+            statusDiv.textContent = 'Message sending cancelled.';
+            showToast('Message sending cancelled.');
+        });
+
+        closePreviewBtn.addEventListener('click', () => {
+            previewModal.classList.add('hidden');
+            tableBody.innerHTML = '';
+            showToast('Data preview closed.');
+        });
+
+        closeMessageBtn.addEventListener('click', () => {
+            messageModal.classList.add('hidden');
+            messageCards.innerHTML = '';
+            showToast('Message preview closed.');
+        });
+
+        uploadError.addEventListener('click', () => {
+            uploadError.style.display = 'none';
+        });
+
+        loadingOverlay.style.display = 'flex';
+        setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+        }, 1500);
+    </script>
+</body>
+</html>
