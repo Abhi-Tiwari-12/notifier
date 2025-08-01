@@ -615,7 +615,7 @@
                     <label class="block text-sm font-medium text-gray-300 mb-1" for="templateSelect">Select Notification Template</label>
                     <select id="templateSelect" class="small-select">
                         <option value="architect_commission">Architect Commission Template</option>
-                        <option value="template_2">Template 2</option>
+                        <option value="new_architect">New Architect</option>
                     </select>
                 </div>
                 <div>
@@ -653,13 +653,13 @@
         <div class="modal-content">
             <h2 id="previewModalTitle" class="text-lg font-semibold mb-4">Data Preview</h2>
             <div style="padding-top: 40px;">
-                <table>
+                <table role="grid" aria-describedby="previewModalTitle">
                     <thead>
                         <tr>
-                            <th scope="col">Phone Number</th>
-                            <th scope="col">Order ID</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Issue Date</th>
+                            <th scope="col" id="phoneHeader">Phone Number</th>
+                            <th scope="col" id="orderHeader">Order ID</th>
+                            <th scope="col" id="amountHeader">Amount</th>
+                            <th scope="col" id="extraHeader"></th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -694,16 +694,6 @@
             </div>
             <div class="flex justify-center mt-4">
                 <button id="closeMessageBtn" class="btn btn-danger">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="template2Modal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="template2ModalTitle" aria-modal="true">
-        <div class="modal-content max-w-sm">
-            <h2 id="template2ModalTitle" class="text-lg font-semibold mb-4 text-center">Template 2</h2>
-            <p class="text-sm text-gray-400 mb-4 text-center">This template is currently under development.</p>
-            <div class="flex justify-center">
-                <button id="closeTemplate2Btn" class="btn btn-danger">Close</button>
             </div>
         </div>
     </div>
@@ -795,12 +785,10 @@
         const uploadError = document.getElementById('uploadError');
         const previewModal = document.getElementById('previewModal');
         const messageModal = document.getElementById('messageModal');
-        const template2Modal = document.getElementById('template2Modal');
         const confirmModal = document.getElementById('confirmModal');
         const messageCards = document.getElementById('messageCards');
         const closePreviewBtn = document.getElementById('closePreviewBtn');
         const closeMessageBtn = document.getElementById('closeMessageBtn');
-        const closeTemplate2Btn = document.getElementById('closeTemplate2Btn');
         const syncBtn = document.getElementById('syncBtn');
         const syncSpinner = document.getElementById('syncSpinner');
         const generatedCodeInput = document.getElementById('generatedCode');
@@ -894,11 +882,18 @@
         }
 
         async function validateAndProcessData(data, isFromAPI = false) {
-            const requiredColumns = ['phoneNo', 'order_id', 'commissionAmount'];
+            const selectedTemplate = templateSelect.value;
+            let requiredColumns = ['phoneNo', 'order_id', 'commissionAmount'];
+            if (selectedTemplate === 'architect_commission') {
+                requiredColumns.push('commissionissueDate');
+            } else if (selectedTemplate === 'new_architect') {
+                requiredColumns.push('refferalMonth');
+            }
+
             const headers = data.length > 0 ? Object.keys(data[0]) : [];
             const missingColumns = requiredColumns.filter(col => !headers.includes(col));
             if (missingColumns.length > 0) {
-                uploadError.textContent = `Error: Missing required columns: ${missingColumns.join(', ')}. Expected: phoneNo, order_id, commissionAmount.`;
+                uploadError.textContent = `Error: Missing required columns: ${missingColumns.join(', ')}. Expected: ${requiredColumns.join(', ')}.`;
                 uploadError.style.display = 'block';
                 statusDiv.textContent = '';
                 previewBtn.disabled = true;
@@ -910,13 +905,20 @@
                 return false;
             }
 
-            jsonData = data.map((row, index) => ({
-                phoneNo: row.phoneNo?.toString().trim() || '',
-                order_id: row.order_id?.toString().trim() || '',
-                commissionAmount: cleanCommissionAmount(row.commissionAmount),
-                commissionissueDate: normalizeDate(row.commissionissueDate),
-                rowIndex: index + 2
-            }));
+            jsonData = data.map((row, index) => {
+                const rowData = {
+                    phoneNo: row.phoneNo?.toString().trim() || '',
+                    order_id: row.order_id?.toString().trim() || '',
+                    commissionAmount: cleanCommissionAmount(row.commissionAmount),
+                    rowIndex: index + 2
+                };
+                if (selectedTemplate === 'architect_commission') {
+                    rowData.commissionissueDate = normalizeDate(row.commissionissueDate);
+                } else if (selectedTemplate === 'new_architect') {
+                    rowData.refferalMonth = row.refferalMonth?.toString().trim() || '';
+                }
+                return rowData;
+            });
 
             const invalidPhones = jsonData.filter(row => !isValidPhoneNumber(row.phoneNo));
             if (invalidPhones.length > 0) {
@@ -953,7 +955,7 @@
             return true;
         }
 
-        [previewModal, messageModal, confirmModal, template2Modal].forEach(modal => {
+        [previewModal, messageModal, confirmModal].forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.add('hidden');
@@ -1024,12 +1026,6 @@
                 syncSpinner.style.display = 'none';
                 syncBtn.querySelector('svg').style.display = 'block';
             }
-        });
-
-        closeTemplate2Btn.addEventListener('click', () => {
-            template2Modal.classList.add('hidden');
-            template2Modal.classList.remove('show');
-            showToast('Template 2 modal closed.');
         });
 
         async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
@@ -1120,16 +1116,20 @@
                 tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400">No data available</td></tr>';
                 return;
             }
+            const selectedTemplate = templateSelect.value;
             jsonData.forEach(row => {
                 const tr = document.createElement('tr');
+                const extraField = selectedTemplate === 'architect_commission' ? row.commissionissueDate : row.refferalMonth;
+                const extraLabel = selectedTemplate === 'architect_commission' ? 'Issue Date' : 'Referral Month';
                 tr.innerHTML = `
-                    <td data-label="Phone Number">${escapeHTML(row.phoneNo || 'N/A')}</td>
-                    <td data-label="Order ID">${escapeHTML(row.order_id || 'N/A')}</td>
-                    <td data-label="Amount">${escapeHTML(row.commissionAmount || 'N/A')}</td>
-                    <td data-label="Issue Date">${escapeHTML(row.commissionissueDate || 'N/A')}</td>
+                    <td data-label="Phone Number" headers="phoneHeader">${escapeHTML(row.phoneNo || 'N/A')}</td>
+                    <td data-label="Order ID" headers="orderHeader">${escapeHTML(row.order_id || 'N/A')}</td>
+                    <td data-label="Amount" headers="amountHeader">${escapeHTML(row.commissionAmount || 'N/A')}</td>
+                    <td data-label="${extraLabel}" headers="extraHeader">${escapeHTML(extraField || 'N/A')}</td>
                 `;
                 tableBody.appendChild(tr);
             });
+            document.querySelector('#extraHeader').textContent = selectedTemplate === 'architect_commission' ? 'Issue Date' : 'Referral Month';
         }
 
         previewBtn.addEventListener('click', () => {
@@ -1139,13 +1139,11 @@
                 return;
             }
             previewSpinner.style.display = 'inline-block';
-            setTimeout(() => {
-                populateTable();
-                previewModal.classList.remove('hidden');
-                previewModal.classList.add('show');
-                previewSpinner.style.display = 'none';
-                showToast('Data preview opened.');
-            }, 500);
+            populateTable();
+            previewModal.classList.remove('hidden');
+            previewModal.classList.add('show');
+            previewSpinner.style.display = 'none';
+            showToast('Data preview opened.');
         });
 
         viewMessagesBtn.addEventListener('click', () => {
@@ -1155,38 +1153,37 @@
                 return;
             }
             const selectedTemplate = templateSelect.value;
-            if (selectedTemplate === 'template_2') {
-                template2Modal.classList.remove('hidden');
-                template2Modal.classList.add('show');
-                showToast('Template 2 modal opened.');
-                return;
-            }
             messagesSpinner.style.display = 'inline-block';
-            setTimeout(() => {
-                messageCards.innerHTML = '';
-                const row = jsonData[0];
-                const messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.commissionAmount || 'N/A')} is being processed for order(s) ${escapeHTML(row.order_id || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.commissionissueDate || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
-                const card = document.createElement('div');
-                card.className = 'p-3';
-                card.innerHTML = `
-                    <div class="whatsapp-message">
-                        <p class="text-sm">${messageTemplate}</p>
-                        <p class="timestamp">12:00 PM</p>
-                    </div>
-                `;
-                messageCards.appendChild(card);
-                messageModal.classList.remove('hidden');
-                messageModal.classList.add('show');
-                messagesSpinner.style.display = 'none';
-                showToast('Message preview opened.');
-            }, 500);
+            messageCards.innerHTML = '';
+            const row = jsonData[0];
+            let messageTemplate;
+            if (selectedTemplate === 'architect_commission') {
+                messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.commissionAmount || 'N/A')} is being processed for order(s) ${escapeHTML(row.order_id || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.commissionissueDate || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
+            } else if (selectedTemplate === 'new_architect') {
+                messageTemplate = `Dear Partner,\n\nThank you for your referral in ${escapeHTML(row.refferalMonth || 'N/A')}. Your commission of ${escapeHTML(row.commissionAmount || 'N/A')} for order ${escapeHTML(row.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
+            }
+            const card = document.createElement('div');
+            card.className = 'p-3';
+            card.innerHTML = `
+                <div class="whatsapp-message">
+                    <p class="text-sm">${messageTemplate}</p>
+                    <p class="timestamp">12:00 PM</p>
+                </div>
+            `;
+            messageCards.appendChild(card);
+            messageModal.classList.remove('hidden');
+            messageModal.classList.add('show');
+            messagesSpinner.style.display = 'none';
+            showToast('Message preview opened.');
         });
 
         function downloadFailedRows(failedRows) {
             if (failedRows.length === 0) return;
+            const selectedTemplate = templateSelect.value;
+            const extraField = selectedTemplate === 'architect_commission' ? 'CommissionIssueDate' : 'RefferalMonth';
             const csv = [
-                'Row,Phone,OrderID,CommissionAmount,CommissionIssueDate,Error',
-                ...failedRows.map(r => `${r.rowIndex},${r.phoneNo || ''},${r.order_id || ''},${r.commissionAmount || ''},${r.commissionissueDate || ''},${r.error.replace(/,/g, '')}`)
+                `Row,Phone,OrderID,CommissionAmount,${extraField},Error`,
+                ...failedRows.map(r => `${r.rowIndex},${r.phoneNo || ''},${r.order_id || ''},${r.commissionAmount || ''},${r[selectedTemplate === 'architect_commission' ? 'commissionissueDate' : 'refferalMonth'] || ''},${r.error.replace(/,/g, '')}`)
             ].join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -1202,15 +1199,28 @@
             const selectedTemplate = templateSelect.value;
             const failedRows = [];
             const promises = batch.map(async (row) => {
-                const payload = {
-                    template_attributes: {
-                        templateName: selectedTemplate,
-                        phoneNo: row.phoneNo,
-                        order_id: row.order_id,
-                        commissionissueDate: row.commissionissueDate,
-                        commissionAmount: row.commissionAmount
-                    }
-                };
+                let payload;
+                if (selectedTemplate === 'architect_commission') {
+                    payload = {
+                        template_attributes: {
+                            templateName: selectedTemplate,
+                            phoneNo: row.phoneNo,
+                            order_id: row.order_id,
+                            commissionissueDate: row.commissionissueDate,
+                            commissionAmount: row.commissionAmount
+                        }
+                    };
+                } else if (selectedTemplate === 'new_architect') {
+                    payload = {
+                        template_attributes: {
+                            templateName: selectedTemplate,
+                            phoneNo: row.phoneNo,
+                            refferalMonth: row.refferalMonth,
+                            order_id: row.order_id,
+                            commissionAmount: row.commissionAmount
+                        }
+                    };
+                }
                 try {
                     const response = await fetchWithRetry(API_URL, {
                         method: 'POST',
@@ -1238,7 +1248,7 @@
                         phoneNo: result.row.phoneNo,
                         order_id: result.row.order_id,
                         commissionAmount: result.row.commissionAmount,
-                        commissionissueDate: result.row.commissionissueDate,
+                        [selectedTemplate === 'architect_commission' ? 'commissionissueDate' : 'refferalMonth']: result.row[selectedTemplate === 'architect_commission' ? 'commissionissueDate' : 'refferalMonth'],
                         error: result.error
                     });
                 }
@@ -1250,13 +1260,6 @@
             if (jsonData.length === 0) {
                 statusDiv.textContent = 'No data to send. Please upload a valid Excel file or sync data.';
                 showToast('No data to send.');
-                return;
-            }
-            const selectedTemplate = templateSelect.value;
-            if (selectedTemplate === 'template_2') {
-                template2Modal.classList.remove('hidden');
-                template2Modal.classList.add('show');
-                showToast('Template 2 modal opened.');
                 return;
             }
             startOTPTimer();
@@ -1340,12 +1343,6 @@
             messageModal.classList.remove('show');
             messageCards.innerHTML = '';
             showToast('Message preview closed.');
-        });
-
-        closeTemplate2Btn.addEventListener('click', () => {
-            template2Modal.classList.add('hidden');
-            template2Modal.classList.remove('show');
-            showToast('Template 2 modal closed.');
         });
 
         uploadError.addEventListener('click', () => {
