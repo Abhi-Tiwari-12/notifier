@@ -616,6 +616,7 @@
                     <select id="templateSelect" class="small-select">
                         <option value="architect_commission">Architect Commission Template</option>
                         <option value="new_architect">New Architect</option>
+                        <option value="architect_may_template">Architect May Template</option>
                     </select>
                 </div>
                 <div>
@@ -883,12 +884,22 @@
 
         async function validateAndProcessData(data, isFromAPI = false) {
             const selectedTemplate = templateSelect.value;
-            let requiredColumns = ['phoneNo', 'order_id', 'commissionAmount'];
+            let orderColumn = 'order_id';
+            let amountColumn = 'commissionAmount';
+            let extraColumn = null;
+            let extraNormalization = (val) => val?.toString().trim() || '';
             if (selectedTemplate === 'architect_commission') {
-                requiredColumns.push('commissionissueDate');
+                extraColumn = 'commissionissueDate';
+                extraNormalization = normalizeDate;
             } else if (selectedTemplate === 'new_architect') {
-                requiredColumns.push('refferalMonth');
+                extraColumn = 'refferalMonth';
+            } else if (selectedTemplate === 'architect_may_template') {
+                orderColumn = 'order_id';
+                amountColumn = 'payAmount';
+                extraColumn = null;
             }
+            const requiredColumns = ['phoneNo', orderColumn, amountColumn];
+            if (extraColumn) requiredColumns.push(extraColumn);
 
             const headers = data.length > 0 ? Object.keys(data[0]) : [];
             const missingColumns = requiredColumns.filter(col => !headers.includes(col));
@@ -908,14 +919,12 @@
             jsonData = data.map((row, index) => {
                 const rowData = {
                     phoneNo: row.phoneNo?.toString().trim() || '',
-                    order_id: row.order_id?.toString().trim() || '',
-                    commissionAmount: cleanCommissionAmount(row.commissionAmount),
+                    orderId: row[orderColumn]?.toString().trim() || '',
+                    amount: cleanCommissionAmount(row[amountColumn]),
                     rowIndex: index + 2
                 };
-                if (selectedTemplate === 'architect_commission') {
-                    rowData.commissionissueDate = normalizeDate(row.commissionissueDate);
-                } else if (selectedTemplate === 'new_architect') {
-                    rowData.refferalMonth = row.refferalMonth?.toString().trim() || '';
+                if (extraColumn) {
+                    rowData.extra = extraNormalization(row[extraColumn]);
                 }
                 return rowData;
             });
@@ -1117,19 +1126,34 @@
                 return;
             }
             const selectedTemplate = templateSelect.value;
+            let extraLabel = '';
+            let displayExtra = false;
+            if (selectedTemplate === 'architect_commission') {
+                extraLabel = 'Issue Date';
+                displayExtra = true;
+            } else if (selectedTemplate === 'new_architect') {
+                extraLabel = 'Referral Month';
+                displayExtra = true;
+            } else if (selectedTemplate === 'architect_may_template') {
+                extraLabel = '';
+                displayExtra = false;
+            }
+            const extraHeader = document.querySelector('#extraHeader');
+            extraHeader.textContent = extraLabel;
+            extraHeader.style.display = displayExtra ? '' : 'none';
+
             jsonData.forEach(row => {
                 const tr = document.createElement('tr');
-                const extraField = selectedTemplate === 'architect_commission' ? row.commissionissueDate : row.refferalMonth;
-                const extraLabel = selectedTemplate === 'architect_commission' ? 'Issue Date' : 'Referral Month';
                 tr.innerHTML = `
                     <td data-label="Phone Number" headers="phoneHeader">${escapeHTML(row.phoneNo || 'N/A')}</td>
-                    <td data-label="Order ID" headers="orderHeader">${escapeHTML(row.order_id || 'N/A')}</td>
-                    <td data-label="Amount" headers="amountHeader">${escapeHTML(row.commissionAmount || 'N/A')}</td>
-                    <td data-label="${extraLabel}" headers="extraHeader">${escapeHTML(extraField || 'N/A')}</td>
+                    <td data-label="Order ID" headers="orderHeader">${escapeHTML(row.orderId || 'N/A')}</td>
+                    <td data-label="Amount" headers="amountHeader">${escapeHTML(row.amount || 'N/A')}</td>
+                    <td data-label="${extraLabel}" headers="extraHeader" style="display: ${displayExtra ? '' : 'none'};">
+                        ${displayExtra ? escapeHTML(row.extra || 'N/A') : ''}
+                    </td>
                 `;
                 tableBody.appendChild(tr);
             });
-            document.querySelector('#extraHeader').textContent = selectedTemplate === 'architect_commission' ? 'Issue Date' : 'Referral Month';
         }
 
         previewBtn.addEventListener('click', () => {
@@ -1158,9 +1182,11 @@
             const row = jsonData[0];
             let messageTemplate;
             if (selectedTemplate === 'architect_commission') {
-                messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.commissionAmount || 'N/A')} is being processed for order(s) ${escapeHTML(row.order_id || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.commissionissueDate || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
+                messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.amount || 'N/A')} is being processed for order(s) ${escapeHTML(row.orderId || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.extra || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
             } else if (selectedTemplate === 'new_architect') {
-                messageTemplate = `Dear Partner,\n\nThank you for your referral in ${escapeHTML(row.refferalMonth || 'N/A')}. Your commission of ${escapeHTML(row.commissionAmount || 'N/A')} for order ${escapeHTML(row.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
+                messageTemplate = `Dear Partner,\n\nThank you for your referral in ${escapeHTML(row.extra || 'N/A')}. Your commission of ${escapeHTML(row.amount || 'N/A')} for order ${escapeHTML(row.orderId || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
+            } else if (selectedTemplate === 'architect_may_template') {
+                messageTemplate = `Dear Partner,\n\nYour payment of ${escapeHTML(row.amount || 'N/A')} for order ${escapeHTML(row.orderId || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
             }
             const card = document.createElement('div');
             card.className = 'p-3';
@@ -1180,10 +1206,21 @@
         function downloadFailedRows(failedRows) {
             if (failedRows.length === 0) return;
             const selectedTemplate = templateSelect.value;
-            const extraField = selectedTemplate === 'architect_commission' ? 'CommissionIssueDate' : 'RefferalMonth';
+            let amountField = 'commissionAmount';
+            let orderField = 'order_id';
+            let extraField = '';
+            if (selectedTemplate === 'architect_commission') {
+                extraField = 'CommissionIssueDate';
+            } else if (selectedTemplate === 'new_architect') {
+                extraField = 'RefferalMonth';
+            } else if (selectedTemplate === 'architect_may_template') {
+                amountField = 'payAmount';
+                orderField = 'orderId';
+                extraField = '';
+            }
             const csv = [
-                `Row,Phone,OrderID,CommissionAmount,${extraField},Error`,
-                ...failedRows.map(r => `${r.rowIndex},${r.phoneNo || ''},${r.order_id || ''},${r.commissionAmount || ''},${r[selectedTemplate === 'architect_commission' ? 'commissionissueDate' : 'refferalMonth'] || ''},${r.error.replace(/,/g, '')}`)
+                `Row,Phone,OrderID,${amountField},${extraField},Error`,
+                ...failedRows.map(r => `${r.rowIndex},${r.phoneNo || ''},${r.orderId || ''},${r.amount || ''},${r.extra || ''},${r.error.replace(/,/g, '')}`)
             ].join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -1205,9 +1242,9 @@
                         template_attributes: {
                             templateName: selectedTemplate,
                             phoneNo: row.phoneNo,
-                            order_id: row.order_id,
-                            commissionissueDate: row.commissionissueDate,
-                            commissionAmount: row.commissionAmount
+                            order_id: row.orderId,
+                            commissionissueDate: row.extra,
+                            commissionAmount: row.amount
                         }
                     };
                 } else if (selectedTemplate === 'new_architect') {
@@ -1215,9 +1252,18 @@
                         template_attributes: {
                             templateName: selectedTemplate,
                             phoneNo: row.phoneNo,
-                            refferalMonth: row.refferalMonth,
-                            order_id: row.order_id,
-                            commissionAmount: row.commissionAmount
+                            refferalMonth: row.extra,
+                            order_id: row.orderId,
+                            commissionAmount: row.amount
+                        }
+                    };
+                } else if (selectedTemplate === 'architect_may_template') {
+                    payload = {
+                        template_attributes: {
+                            templateName: selectedTemplate,
+                            phoneNo: row.phoneNo,
+                            orderId: row.orderId,
+                            payAmount: row.amount
                         }
                     };
                 }
@@ -1246,9 +1292,9 @@
                     failedRows.push({
                         rowIndex: result.row.rowIndex,
                         phoneNo: result.row.phoneNo,
-                        order_id: result.row.order_id,
-                        commissionAmount: result.row.commissionAmount,
-                        [selectedTemplate === 'architect_commission' ? 'commissionissueDate' : 'refferalMonth']: result.row[selectedTemplate === 'architect_commission' ? 'commissionissueDate' : 'refferalMonth'],
+                        orderId: result.row.orderId,
+                        amount: result.row.amount,
+                        extra: result.row.extra,
                         error: result.error
                     });
                 }
