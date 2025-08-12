@@ -895,7 +895,7 @@
                 extraColumn = 'refferalMonth';
             } else if (selectedTemplate === 'architect_may_template') {
                 orderColumn = 'order_id';
-                amountColumn = 'payAmount';
+                amountColumn = 'commissionAmount';
                 extraColumn = null;
             }
             const requiredColumns = ['phoneNo', orderColumn, amountColumn];
@@ -1208,14 +1208,14 @@
             const selectedTemplate = templateSelect.value;
             let amountField = 'commissionAmount';
             let orderField = 'order_id';
-            let extraField = '';
+            let extraField = null;
             if (selectedTemplate === 'architect_commission') {
                 extraField = 'CommissionIssueDate';
             } else if (selectedTemplate === 'new_architect') {
                 extraField = 'RefferalMonth';
             } else if (selectedTemplate === 'architect_may_template') {
-                amountField = 'payAmount';
-                orderField = 'orderId';
+                amountField = 'commissionAmount';
+                orderField = 'order_id';
                 extraField = '';
             }
             const csv = [
@@ -1262,8 +1262,8 @@
                         template_attributes: {
                             templateName: selectedTemplate,
                             phoneNo: row.phoneNo,
-                            orderId: row.orderId,
-                            payAmount: row.amount
+                            order_id: row.orderId,
+                            commissionAmount: row.amount
                         }
                     };
                 }
