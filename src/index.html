@@ -597,13 +597,21 @@
             <img class="brand_logo" src="squares.ico" alt="">
             TSC Arcitect Notifier
         </h1> 
-        <button id="syncBtn" class="sync-btn" title="Sync from Data Source">
-            <svg fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
-                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-            </svg>
-            Sync Data
-            <span id="syncSpinner" class="spinner"></span>
-        </button>
+        <div class="flex gap-2">
+            <button id="syncBtn" class="sync-btn" title="Sync from Data Source">
+                <svg fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+                    <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                </svg>
+                Sync Data
+                <span id="syncSpinner" class="spinner"></span>
+            </button>
+            <button id="addTemplateBtn" class="sync-btn" title="Add New Template">
+                <svg fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+                    <path d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Template
+            </button>
+        </div>
     </header>
 
     <main class="main-content">
@@ -655,13 +663,7 @@
             <h2 id="previewModalTitle" class="text-lg font-semibold mb-4">Data Preview</h2>
             <div style="padding-top: 40px;">
                 <table role="grid" aria-describedby="previewModalTitle">
-                    <thead>
-                        <tr>
-                            <th scope="col" id="phoneHeader">Phone Number</th>
-                            <th scope="col" id="orderHeader">Order ID</th>
-                            <th scope="col" id="amountHeader">Amount</th>
-                            <th scope="col" id="extraHeader"></th>
-                        </tr>
+                    <thead id="tableHead">
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
@@ -684,7 +686,7 @@
                             <path d="M2 5h20v2H2zM2 9h16v2H2zM2 13h12v2H2z"/>
                         </svg>
                         <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm6 9$v-6h6v6h2v-8l-5-4-5 4v8h2z"/>
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm6 9v-6h6v6h2v-8l-5-4-5 4v8h2z"/>
                         </svg>
                         <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 18H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V6h12v6z"/>
@@ -722,6 +724,28 @@
                 </button>
             </div>
             <p id="confirmStatus" class="text-sm text-gray-400 hidden text-center"></p>
+        </div>
+    </div>
+
+    <div id="addTemplateModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="addTemplateModalTitle" aria-modal="true">
+        <div class="modal-content max-w-md">
+            <h2 id="addTemplateModalTitle" class="text-lg font-semibold mb-4">Add New Template</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1" for="newTemplateName">Template Name</label>
+                    <input type="text" id="newTemplateName" class="input-field" placeholder="e.g., architect_may_template">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Variables (phoneNo is always included)</label>
+                    <div id="variablesContainer" class="space-y-2"></div>
+                    <button id="addVariableBtn" class="btn mt-2 text-sm">Add Variable</button>
+                </div>
+                <div id="addTemplateError" class="error-message"></div>
+            </div>
+            <div class="flex justify-end mt-4 gap-3">
+                <button id="cancelAddTemplateBtn" class="btn btn-danger">Cancel</button>
+                <button id="saveTemplateBtn" class="btn">Save</button>
+            </div>
         </div>
     </div>
 
@@ -776,21 +800,39 @@
         const API_TOKEN = 'ckfVh0Mq2h6VOj2Rixw3n47rclh4fGKz1AQ2uMol';
         const BATCH_SIZE = 10;
 
+        let templateConfigs = {
+            'architect_commission': {
+                variables: ['order_id', 'commissionAmount', 'commissionissueDate'],
+                isCustom: false
+            },
+            'new_architect': {
+                variables: ['order_id', 'commissionAmount', 'refferalMonth'],
+                isCustom: false
+            },
+            'architect_may_template': {
+                variables: ['order_id', 'commissionAmount'],
+                isCustom: false
+            }
+        };
+
         const fileInput = document.getElementById('fileInput');
         const templateSelect = document.getElementById('templateSelect');
         const previewBtn = document.getElementById('previewBtn');
         const viewMessagesBtn = document.getElementById('viewMessagesBtn');
         const sendAllBtn = document.getElementById('sendAllBtn');
+        const tableHead = document.getElementById('tableHead');
         const tableBody = document.getElementById('tableBody');
         const statusDiv = document.getElementById('status');
         const uploadError = document.getElementById('uploadError');
         const previewModal = document.getElementById('previewModal');
         const messageModal = document.getElementById('messageModal');
         const confirmModal = document.getElementById('confirmModal');
+        const addTemplateModal = document.getElementById('addTemplateModal');
         const messageCards = document.getElementById('messageCards');
         const closePreviewBtn = document.getElementById('closePreviewBtn');
         const closeMessageBtn = document.getElementById('closeMessageBtn');
         const syncBtn = document.getElementById('syncBtn');
+        const addTemplateBtn = document.getElementById('addTemplateBtn');
         const syncSpinner = document.getElementById('syncSpinner');
         const generatedCodeInput = document.getElementById('generatedCode');
         const confirmCodeInput = document.getElementById('confirmCodeInput');
@@ -809,8 +851,30 @@
         const fileValidation = document.getElementById('fileValidation');
         const timerDisplay = document.getElementById('timerDisplay');
         const timerText = document.getElementById('timerText');
+        const newTemplateName = document.getElementById('newTemplateName');
+        const variablesContainer = document.getElementById('variablesContainer');
+        const addVariableBtn = document.getElementById('addVariableBtn');
+        const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+        const cancelAddTemplateBtn = document.getElementById('cancelAddTemplateBtn');
+        const addTemplateError = document.getElementById('addTemplateError');
         let jsonData = [];
         let confirmationCode = '';
+
+        // Load custom templates from localStorage
+        function loadCustomTemplates() {
+            const stored = localStorage.getItem('customTemplates');
+            if (stored) {
+                const customs = JSON.parse(stored);
+                for (let name in customs) {
+                    templateConfigs[name] = { variables: customs[name], isCustom: true };
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    templateSelect.appendChild(option);
+                }
+            }
+        }
+        loadCustomTemplates();
 
         function escapeHTML(str) {
             const div = document.createElement('div');
@@ -833,6 +897,16 @@
 
         function cleanCommissionAmount(amount) {
             return amount?.toString().trim().replace(/,/g, '') || '';
+        }
+
+        function normalizeValue(varName, value) {
+            if (varName.toLowerCase().includes('amount')) {
+                return cleanCommissionAmount(value);
+            } else if (varName.toLowerCase().includes('date')) {
+                return normalizeDate(value);
+            } else {
+                return value?.toString().trim() || '';
+            }
         }
 
         function generateConfirmationCode() {
@@ -884,23 +958,13 @@
 
         async function validateAndProcessData(data, isFromAPI = false) {
             const selectedTemplate = templateSelect.value;
-            let orderColumn = 'order_id';
-            let amountColumn = 'commissionAmount';
-            let extraColumn = null;
-            let extraNormalization = (val) => val?.toString().trim() || '';
-            if (selectedTemplate === 'architect_commission') {
-                extraColumn = 'commissionissueDate';
-                extraNormalization = normalizeDate;
-            } else if (selectedTemplate === 'new_architect') {
-                extraColumn = 'refferalMonth';
-            } else if (selectedTemplate === 'architect_may_template') {
-                orderColumn = 'order_id';
-                amountColumn = 'commissionAmount';
-                extraColumn = null;
+            const config = templateConfigs[selectedTemplate];
+            if (!config) {
+                uploadError.textContent = 'Invalid template selected.';
+                uploadError.style.display = 'block';
+                return false;
             }
-            const requiredColumns = ['phoneNo', orderColumn, amountColumn];
-            if (extraColumn) requiredColumns.push(extraColumn);
-
+            const requiredColumns = ['phoneNo', ...config.variables];
             const headers = data.length > 0 ? Object.keys(data[0]) : [];
             const missingColumns = requiredColumns.filter(col => !headers.includes(col));
             if (missingColumns.length > 0) {
@@ -919,13 +983,12 @@
             jsonData = data.map((row, index) => {
                 const rowData = {
                     phoneNo: row.phoneNo?.toString().trim() || '',
-                    orderId: row[orderColumn]?.toString().trim() || '',
-                    amount: cleanCommissionAmount(row[amountColumn]),
+                    variables: {},
                     rowIndex: index + 2
                 };
-                if (extraColumn) {
-                    rowData.extra = extraNormalization(row[extraColumn]);
-                }
+                config.variables.forEach(varName => {
+                    rowData.variables[varName] = normalizeValue(varName, row[varName]);
+                });
                 return rowData;
             });
 
@@ -964,7 +1027,7 @@
             return true;
         }
 
-        [previewModal, messageModal, confirmModal].forEach(modal => {
+        [previewModal, messageModal, confirmModal, addTemplateModal].forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.add('hidden');
@@ -983,6 +1046,71 @@
                     copyCodeBtn.textContent = 'Copy';
                 }, 2000);
             });
+        });
+
+        addTemplateBtn.addEventListener('click', () => {
+            newTemplateName.value = '';
+            variablesContainer.innerHTML = '';
+            addTemplateError.style.display = 'none';
+            addTemplateModal.classList.remove('hidden');
+            addTemplateModal.classList.add('show');
+        });
+
+        cancelAddTemplateBtn.addEventListener('click', () => {
+            addTemplateModal.classList.add('hidden');
+            addTemplateModal.classList.remove('show');
+        });
+
+        addVariableBtn.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'input-field flex-grow';
+            input.placeholder = 'e.g., order_id';
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger text-sm';
+            removeBtn.textContent = 'Remove';
+            removeBtn.addEventListener('click', () => div.remove());
+            div.appendChild(input);
+            div.appendChild(removeBtn);
+            variablesContainer.appendChild(div);
+        });
+
+        saveTemplateBtn.addEventListener('click', () => {
+            const name = newTemplateName.value.trim();
+            if (!name) {
+                addTemplateError.textContent = 'Template name is required.';
+                addTemplateError.style.display = 'block';
+                return;
+            }
+            if (templateConfigs[name]) {
+                addTemplateError.textContent = 'Template name already exists.';
+                addTemplateError.style.display = 'block';
+                return;
+            }
+            const vars = Array.from(variablesContainer.querySelectorAll('input')).map(input => input.value.trim()).filter(v => v);
+            if (vars.length === 0) {
+                addTemplateError.textContent = 'At least one variable is required.';
+                addTemplateError.style.display = 'block';
+                return;
+            }
+            templateConfigs[name] = { variables: vars, isCustom: true };
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            templateSelect.appendChild(option);
+            // Save to localStorage
+            const customs = {};
+            for (let key in templateConfigs) {
+                if (templateConfigs[key].isCustom) {
+                    customs[key] = templateConfigs[key].variables;
+                }
+            }
+            localStorage.setItem('customTemplates', JSON.stringify(customs));
+            addTemplateModal.classList.add('hidden');
+            addTemplateModal.classList.remove('show');
+            showToast('Template added successfully!');
         });
 
         syncBtn.addEventListener('click', async () => {
@@ -1120,38 +1248,36 @@
         });
 
         function populateTable() {
+            tableHead.innerHTML = '';
             tableBody.innerHTML = '';
             if (jsonData.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400">No data available</td></tr>';
                 return;
             }
             const selectedTemplate = templateSelect.value;
-            let extraLabel = '';
-            let displayExtra = false;
-            if (selectedTemplate === 'architect_commission') {
-                extraLabel = 'Issue Date';
-                displayExtra = true;
-            } else if (selectedTemplate === 'new_architect') {
-                extraLabel = 'Referral Month';
-                displayExtra = true;
-            } else if (selectedTemplate === 'architect_may_template') {
-                extraLabel = '';
-                displayExtra = false;
-            }
-            const extraHeader = document.querySelector('#extraHeader');
-            extraHeader.textContent = extraLabel;
-            extraHeader.style.display = displayExtra ? '' : 'none';
+            const config = templateConfigs[selectedTemplate];
+            const headTr = document.createElement('tr');
+            const phoneTh = document.createElement('th');
+            phoneTh.scope = 'col';
+            phoneTh.id = 'phoneHeader';
+            phoneTh.textContent = 'Phone Number';
+            headTr.appendChild(phoneTh);
+            config.variables.forEach((varName, idx) => {
+                const th = document.createElement('th');
+                th.scope = 'col';
+                th.id = `varHeader${idx}`;
+                th.textContent = varName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                headTr.appendChild(th);
+            });
+            tableHead.appendChild(headTr);
 
             jsonData.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td data-label="Phone Number" headers="phoneHeader">${escapeHTML(row.phoneNo || 'N/A')}</td>
-                    <td data-label="Order ID" headers="orderHeader">${escapeHTML(row.orderId || 'N/A')}</td>
-                    <td data-label="Amount" headers="amountHeader">${escapeHTML(row.amount || 'N/A')}</td>
-                    <td data-label="${extraLabel}" headers="extraHeader" style="display: ${displayExtra ? '' : 'none'};">
-                        ${displayExtra ? escapeHTML(row.extra || 'N/A') : ''}
-                    </td>
-                `;
+                let tdHtml = `<td data-label="Phone Number" headers="phoneHeader">${escapeHTML(row.phoneNo || 'N/A')}</td>`;
+                config.variables.forEach((varName, idx) => {
+                    tdHtml += `<td data-label="${varName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}" headers="varHeader${idx}">${escapeHTML(row.variables[varName] || 'N/A')}</td>`;
+                });
+                tr.innerHTML = tdHtml;
                 tableBody.appendChild(tr);
             });
         }
@@ -1177,16 +1303,22 @@
                 return;
             }
             const selectedTemplate = templateSelect.value;
+            const config = templateConfigs[selectedTemplate];
             messagesSpinner.style.display = 'inline-block';
             messageCards.innerHTML = '';
             const row = jsonData[0];
             let messageTemplate;
-            if (selectedTemplate === 'architect_commission') {
-                messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.amount || 'N/A')} is being processed for order(s) ${escapeHTML(row.orderId || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.extra || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
-            } else if (selectedTemplate === 'new_architect') {
-                messageTemplate = `Dear Partner,\n\nThank you for your referral in ${escapeHTML(row.extra || 'N/A')}. Your commission of ${escapeHTML(row.amount || 'N/A')} for order ${escapeHTML(row.orderId || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
-            } else if (selectedTemplate === 'architect_may_template') {
-                messageTemplate = `Dear Partner,\n\nYour payment of ${escapeHTML(row.amount || 'N/A')} for order ${escapeHTML(row.orderId || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
+            if (!config.isCustom) {
+                if (selectedTemplate === 'architect_commission') {
+                    messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.variables.commissionAmount || 'N/A')} is being processed for order(s) ${escapeHTML(row.variables.order_id || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.variables.commissionissueDate || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
+                } else if (selectedTemplate === 'new_architect') {
+                    messageTemplate = `Dear Partner,\n\nThank you for your referral in ${escapeHTML(row.variables.refferalMonth || 'N/A')}. Your commission of ${escapeHTML(row.variables.commissionAmount || 'N/A')} for order ${escapeHTML(row.variables.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
+                } else if (selectedTemplate === 'architect_may_template') {
+                    messageTemplate = `Dear Partner,\n\nYour payment of ${escapeHTML(row.variables.commissionAmount || 'N/A')} for order ${escapeHTML(row.variables.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
+                }
+            } else {
+                const varsStr = config.variables.map(v => `${v.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}: ${escapeHTML(row.variables[v] || 'N/A')}`).join('\n');
+                messageTemplate = `Dear Partner,\n\nYour ${selectedTemplate.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} details:\n${varsStr}\n\nBest regards,\nThe Sleep Company`;
             }
             const card = document.createElement('div');
             card.className = 'p-3';
@@ -1206,22 +1338,17 @@
         function downloadFailedRows(failedRows) {
             if (failedRows.length === 0) return;
             const selectedTemplate = templateSelect.value;
-            let amountField = 'commissionAmount';
-            let orderField = 'order_id';
-            let extraField = null;
-            if (selectedTemplate === 'architect_commission') {
-                extraField = 'CommissionIssueDate';
-            } else if (selectedTemplate === 'new_architect') {
-                extraField = 'RefferalMonth';
-            } else if (selectedTemplate === 'architect_may_template') {
-                amountField = 'commissionAmount';
-                orderField = 'order_id';
-                extraField = '';
-            }
-            const csv = [
-                `Row,Phone,OrderID,${amountField},${extraField},Error`,
-                ...failedRows.map(r => `${r.rowIndex},${r.phoneNo || ''},${r.orderId || ''},${r.amount || ''},${r.extra || ''},${r.error.replace(/,/g, '')}`)
-            ].join('\n');
+            const config = templateConfigs[selectedTemplate];
+            let csvHeader = `Row,Phone`;
+            config.variables.forEach(v => csvHeader += `,${v}`);
+            csvHeader += ',Error';
+            const csvRows = failedRows.map(r => {
+                let rowStr = `${r.rowIndex},${r.phoneNo || ''}`;
+                config.variables.forEach(v => rowStr += `,${r.variables[v] || ''}`);
+                rowStr += `,${r.error.replace(/,/g, '')}`;
+                return rowStr;
+            });
+            const csv = [csvHeader, ...csvRows].join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1236,37 +1363,13 @@
             const selectedTemplate = templateSelect.value;
             const failedRows = [];
             const promises = batch.map(async (row) => {
-                let payload;
-                if (selectedTemplate === 'architect_commission') {
-                    payload = {
-                        template_attributes: {
-                            templateName: selectedTemplate,
-                            phoneNo: row.phoneNo,
-                            order_id: row.orderId,
-                            commissionissueDate: row.extra,
-                            commissionAmount: row.amount
-                        }
-                    };
-                } else if (selectedTemplate === 'new_architect') {
-                    payload = {
-                        template_attributes: {
-                            templateName: selectedTemplate,
-                            phoneNo: row.phoneNo,
-                            refferalMonth: row.extra,
-                            order_id: row.orderId,
-                            commissionAmount: row.amount
-                        }
-                    };
-                } else if (selectedTemplate === 'architect_may_template') {
-                    payload = {
-                        template_attributes: {
-                            templateName: selectedTemplate,
-                            phoneNo: row.phoneNo,
-                            order_id: row.orderId,
-                            commissionAmount: row.amount
-                        }
-                    };
-                }
+                const payload = {
+                    template_attributes: {
+                        templateName: selectedTemplate,
+                        phoneNo: row.phoneNo,
+                        ...row.variables
+                    }
+                };
                 try {
                     const response = await fetchWithRetry(API_URL, {
                         method: 'POST',
@@ -1292,9 +1395,7 @@
                     failedRows.push({
                         rowIndex: result.row.rowIndex,
                         phoneNo: result.row.phoneNo,
-                        orderId: result.row.orderId,
-                        amount: result.row.amount,
-                        extra: result.row.extra,
+                        variables: result.row.variables,
                         error: result.error
                     });
                 }
