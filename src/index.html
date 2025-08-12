@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSC Arcitect Notifier</title>
+    <title>TSC Arcitect Notifier - Login</title>
     <link rel="icon" type="image/x-icon" href="squares.ico">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -57,18 +56,15 @@
             width: 28px;
             height: 28px;
         }
-        .header svg {
-            width: 24px;
-            height: 24px;
-            color: #9ca3af;
-            margin-right: 8px;
-        }
         .main-content {
             flex-grow: 1;
             padding: 24px;
             max-width: 1280px;
             margin: 0 auto;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .card {
             background: rgba(255, 255, 255, 0.1);
@@ -77,6 +73,8 @@
             border-radius: 12px;
             padding: 24px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
         }
         .btn {
             padding: 10px 20px;
@@ -85,50 +83,12 @@
             transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
             background: #ffffff;
             color: #000000;
+            width: 100%;
         }
         .btn:hover:not(:disabled) {
             background: #d1d5db;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-        }
-        .btn-danger {
-            background: #ff4d4f;
-            color: #ffffff;
-        }
-        .btn-danger:hover:not(:disabled) {
-            background: #e6393a;
-        }
-        .sync-btn {
-            display: flex;
-            align-items: center;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            font-weight: 500;
-            border: 1px solid #9ca3af;
-            transition: background 0.2s ease, border-color 0.2s ease;
-        }
-        .sync-btn:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #d1d5db;
-        }
-        .sync-btn.spinning svg {
-            display: none;
-        }
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-left: 3px solid #ffffff;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            animation: spin 0.8s linear infinite;
-            display: none;
-            margin-left: 6px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
         .error-message {
             background: rgba(255, 75, 75, 0.2);
@@ -139,207 +99,22 @@
             display: none;
             animation: fadeIn 0.4s ease;
         }
-        .progress-bar {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: #ffffff;
-            transition: width 0.5s ease-in-out;
-        }
-        .modal {
-            background: rgba(0, 0, 0, 0.7);
-            animation: fadeIn 0.3s ease;
-            display: none;
-        }
-        .modal.show {
-            display: flex;
-        }
-        .modal-content {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            max-width: 95%;
-            width: 1000px;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #ffffff;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        th {
-            background: rgba(255, 255, 255, 0.05);
-            font-weight: 600;
-            top: 0;
-            z-index: 5;
-        }
-        tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .phone-mockup {
-            background: #1f1f1f;
-            border: 6px solid #9ca3af;
-            border-radius: 24px;
-            width: 280px;
-            height: 520px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-            margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-        }
-        .phone-notch {
-            position: absolute;
-            top: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90px;
-            height: 16px;
-            background: #9ca3af;
-            border-radius: 6px;
-        }
-        .phone-screen {
-            width: 100%;
-            height: 100%;
-            background: #000000;
-            padding: 32px 8px 8px;
-            overflow-y: auto;
-            font-size: clamp(0.65rem, 2.2vw, 0.75rem);
-            line-height: 1.4;
-            color: #ffffff;
-        }
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 8px;
-            background: #1f1f1f;
-            border-bottom: 1px solid #9ca3af;
-            position: absolute;
-            top: 0;
-            width: 100%;
-        }
-        .whatsapp-message {
-            background: #ffffff;
-            color: #000000;
-            border-radius: 8px;
-            max-width: 80%;
-            margin-left: auto;
-            padding: 6px 10px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            font-size: clamp(0.65rem, 2.2vw, 0.75rem);
-        }
-        .timestamp {
-            font-size: clamp(0.55rem, 1.8vw, 0.65rem);
-            color: #9ca3af;
-            text-align: right;
-            margin-top: 3px;
-        }
-        .otp-timer {
-            width: 48px;
-            height: 48px;
-            position: relative;
-            margin: 0 auto;
-        }
-        .otp-timer svg {
-            transform: rotate(-90deg);
-        }
-        .otp-timer circle {
-            fill: none;
-            stroke: #ffffff;
-            stroke-width: 3;
-            stroke-dasharray: 150;
-            stroke-dashoffset: 0;
-            animation: countdown 30s linear forwards;
-        }
-        @keyframes countdown {
-            to { stroke-dashoffset: 150; }
-        }
-        .otp-timer span {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.85rem;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-left: 4px solid #ffffff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        .toast {
-            position: fixed;
-            bottom: 12px;
-            right: 12px;
-            background: #ffffff;
-            color: #000000;
-            padding: 10px 20px;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            display: none;
-            z-index: 1000;
-        }
-        .input-field, .small-select {
+        .input-field {
             padding: 8px;
             border: 1px solid #9ca3af;
             border-radius: 6px;
             font-size: 0.85rem;
             width: 100%;
             color: #ffffff;
-        }
-        .input-field {
             background: rgba(255, 255, 255, 0.1);
-        }
-        .small-select {
-            background: #000000;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3e%3cpath d='M7 10l5 5 5-5H7z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 6px center;
-            background-size: 10px;
-            max-width: 280px;
         }
         .input-field::placeholder {
             color: #9ca3af;
         }
-        .small-select:focus, .input-field:focus {
+        .input-field:focus {
             outline: none;
             border-color: #d1d5db;
             box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-        }
-        .file-input {
-            padding: 8px;
-            border: 1px solid #9ca3af;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            font-size: 86%;
         }
         footer {
             background: #1f1f1f;
@@ -349,27 +124,6 @@
             color: #9ca3af;
             font-size: 0.85rem;
             margin-top: auto;
-        }
-        @media (max-width: 1024px) {
-            .main-content {
-                padding: 20px;
-            }
-            .card {
-                padding: 20px;
-            }
-            .modal-content {
-                width: 90%;
-                max-width: 800px;
-            }
-            .phone-mockup {
-                width: 260px;
-                height: 480px;
-                border-radius: 20px;
-            }
-            .phone-notch {
-                width: 80px;
-                height: 14px;
-            }
         }
         @media (max-width: 768px) {
             .header {
@@ -388,29 +142,13 @@
             .card {
                 padding: 16px;
             }
-            .btn, .sync-btn {
+            .btn {
                 padding: 8px 14px;
                 font-size: 0.8rem;
             }
-            .small-select {
-                max-width: 100%;
-            }
-            .phone-mockup {
-                width: 240px;
-                height: 440px;
-                border-radius: 18px;
-            }
-            .phone-notch {
-                width: 70px;
-                height: 12px;
-            }
-            .modal-content {
-                width: 95%;
-                padding: 16px;
-                max-height: 75vh;
-            }
-            th, td {
-                padding: 8px;
+            .input-field {
+                padding: 12px;
+                font-size: 0.8rem;
             }
         }
         @media (max-width: 640px) {
@@ -428,50 +166,13 @@
             .card {
                 padding: 12px;
             }
-            .btn, .sync-btn {
+            .btn {
                 padding: 6px 12px;
                 font-size: 0.75rem;
             }
-            .input-field, .small-select {
+            .input-field {
                 padding: 12px;
                 font-size: 0.8rem;
-            }
-            .phone-mockup {
-                width: 220px;
-                height: 400px;
-                border-radius: 16px;
-            }
-            .phone-notch {
-                width: 60px;
-                height: 10px;
-            }
-            table {
-                display: block;
-            }
-            thead {
-                display: none;
-            }
-            tr {
-                display: block;
-                margin-bottom: 0.75rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            }
-            td {
-                display: block;
-                text-align: left;
-                padding: 6px;
-                font-size: 0.8rem;
-            }
-            td:before {
-                content: attr(data-label);
-                font-weight: 600;
-                display: block;
-                color: #ffffff;
-            }
-            .modal-content {
-                width: 98%;
-                padding: 12px;
-                max-height: 70vh;
             }
         }
         @media (max-width: 480px) {
@@ -492,41 +193,12 @@
                 padding: 10px;
                 border-radius: 8px;
             }
-            .btn, .sync-btn {
+            .btn {
                 padding: 6px 10px;
                 font-size: 0.7rem;
             }
-            .input-field, .small-select {
+            .input-field {
                 padding: 12px;
-                font-size: 0.75rem;
-            }
-            .phone-mockup {
-                width: 200px;
-                height: 360px;
-                border-radius: 14px;
-            }
-            .phone-notch {
-                width: 50px;
-                height: 8px;
-            }
-            .phone-screen {
-                padding: 28px 6px 6px;
-                font-size: clamp(0.6rem, 2vw, 0.7rem);
-            }
-            .whatsapp-message {
-                padding: 5px 8px;
-                font-size: clamp(0.6rem, 2vw, 0.7rem);
-            }
-            .timestamp {
-                font-size: clamp(0.5rem, 1.5vw, 0.6rem);
-            }
-            .modal-content {
-                width: 100%;
-                padding: 10px;
-                max-height: 65vh;
-            }
-            th, td {
-                padding: 6px;
                 font-size: 0.75rem;
             }
         }
@@ -548,45 +220,18 @@
                 padding: 8px;
                 border-radius: 6px;
             }
-            .btn, .sync-btn {
+            .btn {
                 padding: 5px 8px;
                 font-size: 0.65rem;
             }
-            .input-field, .small-select {
+            .input-field {
                 padding: 4px;
                 font-size: 0.7rem;
-            }
-            .phone-mockup {
-                width: 180px;
-                height: 320px;
-                border-radius: 12px;
-            }
-            .phone-notch {
-                width: 40px;
-                height: 6px;
-            }
-            .modal-content {
-                width: 100%;
-                padding: 8px;
-                max-height: 60vh;
-            }
-            th, td {
-                padding: 5px;
-                font-size: 0.7rem;
-            }
-            .toast {
-                padding: 8px 16px;
-                font-size: 0.65rem;
             }
         }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
-        }
-        @keyframes twinkle {
-            0% { opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { opacity: 0.2; }
         }
     </style>
 </head>
@@ -596,164 +241,26 @@
         <h1>
             <img class="brand_logo" src="squares.ico" alt="">
             TSC Arcitect Notifier
-        </h1> 
-        <div class="flex gap-2">
-            <button id="syncBtn" class="sync-btn" title="Sync from Data Source">
-                <svg fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
-                    <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-                </svg>
-                Sync Data
-                <span id="syncSpinner" class="spinner"></span>
-            </button>
-            <button id="addTemplateBtn" class="sync-btn" title="Add New Template">
-                <svg fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
-                    <path d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Template
-            </button>
-        </div>
+        </h1>
     </header>
 
     <main class="main-content">
         <div class="card">
-            <h2 class="text-lg font-semibold mb-4">Send WhatsApp Notifications</h2>
-            <p class="text-sm text-gray-400 mb-6">Streamline your partner communications with seamless WhatsApp notification management.</p>
+            <h2 class="text-lg font-semibold mb-4 text-center">Login</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1" for="templateSelect">Select Notification Template</label>
-                    <select id="templateSelect" class="small-select">
-                        <option value="architect_commission">Architect Commission Template</option>
-                        <option value="new_architect">New Architect</option>
-                        <option value="architect_may_template">Architect May Template</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-300 mb-1" for="userId">User ID</label>
+                    <input type="text" id="userId" class="input-field" placeholder="Enter user Id" aria-label="User ID">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1" for="fileInput">Upload Data File (Excel)</label>
-                    <input type="file" id="fileInput" accept=".xlsx, .xls" class="file-input">
-                    <p id="fileValidation" class="text-sm text-gray-400 mt-1 hidden"></p>
+                    <label class="block text-sm font-medium text-gray-300 mb-1" for="password">Password</label>
+                    <input type="password" id="password" class="input-field" placeholder="Enter password" aria-label="Password">
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button id="previewBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
-                        Preview Data
-                        <span id="previewSpinner" class="spinner"></span>
-                    </button>
-                    <button id="viewMessagesBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
-                        View Message
-                        <span id="messagesSpinner" class="spinner"></span>
-                    </button>
-                    <button id="sendAllBtn" class="btn flex items-center disabled:bg-gray-500" disabled>
-                        Send Notifications
-                        <span id="sendSpinner" class="spinner"></span>
-                    </button>
-                </div>
-                <div id="uploadError" class="error-message"></div>
-                <div id="progressContainer" class="mt-4 hidden">
-                    <p class="text-sm text-gray-300 mb-1">Sending Progress</p>
-                    <div class="progress-bar">
-                        <div id="progressBarFill" class="progress-bar-fill" style="width: 0%"></div>
-                    </div>
-                </div>
+                <div id="loginError" class="error-message"></div>
+                <button id="loginBtn" class="btn">Login</button>
             </div>
-            <div id="status" class="text-sm text-gray-400 text-center mt-4"></div>
         </div>
     </main>
-
-    <div id="previewModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="previewModalTitle" aria-modal="true">
-        <div class="modal-content">
-            <h2 id="previewModalTitle" class="text-lg font-semibold mb-4">Data Preview</h2>
-            <div style="padding-top: 40px;">
-                <table role="grid" aria-describedby="previewModalTitle">
-                    <thead id="tableHead">
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-            <div class="flex justify-end mt-4">
-                <button id="closePreviewBtn" class="btn btn-danger">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="messageModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="messageModalTitle" aria-modal="true">
-        <div class="modal-content max-w-md">
-            <h2 id="messageModalTitle" class="text-lg font-semibold mb-4 text-center">Message Preview</h2>
-            <div class="phone-mockup">
-                <div class="phone-notch"></div>
-                <div class="status-bar">
-                    <span class="text-sm text-gray-400">12:00 PM</span>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M2 5h20v2H2zM2 9h16v2H2zM2 13h12v2H2z"/>
-                        </svg>
-                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm6 9v-6h6v6h2v-8l-5-4-5 4v8h2z"/>
-                        </svg>
-                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 18H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V6h12v6z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div id="messageCards" class="phone-screen"></div>
-            </div>
-            <div class="flex justify-center mt-4">
-                <button id="closeMessageBtn" class="btn btn-danger">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="confirmModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="confirmModalTitle" aria-modal="true">
-        <div class="modal-content max-w-sm">
-            <h2 id="confirmModalTitle" class="text-lg font-semibold mb-4 text-center">Confirm Notification Sending</h2>
-            <p class="text-sm text-gray-400 mb-4 text-center">Enter the code below to confirm (<span id="timerDisplay">30</span>s):</p>
-            <div class="otp-timer mb-4">
-                <svg width="48" height="48">
-                    <circle cx="24" cy="24" r="22" />
-                </svg>
-                <span id="timerText">30</span>
-            </div>
-            <div class="flex items-center gap-2 mb-4">
-                <input type="text" id="generatedCode" readonly class="input-field font-mono" value="" aria-label="Generated confirmation code">
-                <button id="copyCodeBtn" class="btn text-sm">Copy</button>
-            </div>
-            <input type="text" id="confirmCodeInput" maxlength="6" placeholder="Enter code" class="input-field" aria-label="Enter confirmation code">
-            <div class="flex justify-center gap-3 mt-4">
-                <button id="cancelConfirmBtn" class="btn btn-danger text-sm">Cancel</button>
-                <button id="submitConfirmBtn" class="btn flex items-center text-sm">
-                    Confirm
-                    <span id="confirmSpinner" class="spinner"></span>
-                </button>
-            </div>
-            <p id="confirmStatus" class="text-sm text-gray-400 hidden text-center"></p>
-        </div>
-    </div>
-
-    <div id="addTemplateModal" class="fixed inset-0 modal hidden flex items-center justify-center z-50" role="dialog" aria-labelledby="addTemplateModalTitle" aria-modal="true">
-        <div class="modal-content max-w-md">
-            <h2 id="addTemplateModalTitle" class="text-lg font-semibold mb-4">Add New Template</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1" for="newTemplateName">Template Name</label>
-                    <input type="text" id="newTemplateName" class="input-field" placeholder="e.g., architect_may_template">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Variables (phoneNo is always included)</label>
-                    <div id="variablesContainer" class="space-y-2"></div>
-                    <button id="addVariableBtn" class="btn mt-2 text-sm">Add Variable</button>
-                </div>
-                <div id="addTemplateError" class="error-message"></div>
-            </div>
-            <div class="flex justify-end mt-4 gap-3">
-                <button id="cancelAddTemplateBtn" class="btn btn-danger">Cancel</button>
-                <button id="saveTemplateBtn" class="btn">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <div id="toast" class="toast"></div>
 
     <footer>
         <p>© Product by Abhishek Tiwari D2C</p>
@@ -795,711 +302,35 @@
         }
         createStars();
 
-        const API_URL = 'https://d3cu187wy0.execute-api.ap-south-1.amazonaws.com/dev/sendwhatsapp';
-        const GOOGLE_SHEET_API = '/api/sheet';
-        const API_TOKEN = 'ckfVh0Mq2h6VOj2Rixw3n47rclh4fGKz1AQ2uMol';
-        const BATCH_SIZE = 10;
+        const userIdInput = document.getElementById('userId');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
 
-        let templateConfigs = {
-            'architect_commission': {
-                variables: ['order_id', 'commissionAmount', 'commissionissueDate'],
-                isCustom: false
-            },
-            'new_architect': {
-                variables: ['order_id', 'commissionAmount', 'refferalMonth'],
-                isCustom: false
-            },
-            'architect_may_template': {
-                variables: ['order_id', 'commissionAmount'],
-                isCustom: false
+        loginBtn.addEventListener('click', () => {
+            const userId = userIdInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!userId || !password) {
+                loginError.textContent = 'Please enter both User ID and Password.';
+                loginError.style.display = 'block';
+                return;
             }
-        };
 
-        const fileInput = document.getElementById('fileInput');
-        const templateSelect = document.getElementById('templateSelect');
-        const previewBtn = document.getElementById('previewBtn');
-        const viewMessagesBtn = document.getElementById('viewMessagesBtn');
-        const sendAllBtn = document.getElementById('sendAllBtn');
-        const tableHead = document.getElementById('tableHead');
-        const tableBody = document.getElementById('tableBody');
-        const statusDiv = document.getElementById('status');
-        const uploadError = document.getElementById('uploadError');
-        const previewModal = document.getElementById('previewModal');
-        const messageModal = document.getElementById('messageModal');
-        const confirmModal = document.getElementById('confirmModal');
-        const addTemplateModal = document.getElementById('addTemplateModal');
-        const messageCards = document.getElementById('messageCards');
-        const closePreviewBtn = document.getElementById('closePreviewBtn');
-        const closeMessageBtn = document.getElementById('closeMessageBtn');
-        const syncBtn = document.getElementById('syncBtn');
-        const addTemplateBtn = document.getElementById('addTemplateBtn');
-        const syncSpinner = document.getElementById('syncSpinner');
-        const generatedCodeInput = document.getElementById('generatedCode');
-        const confirmCodeInput = document.getElementById('confirmCodeInput');
-        const copyCodeBtn = document.getElementById('copyCodeBtn');
-        const submitConfirmBtn = document.getElementById('submitConfirmBtn');
-        const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
-        const confirmStatus = document.getElementById('confirmStatus');
-        const previewSpinner = document.getElementById('previewSpinner');
-        const messagesSpinner = document.getElementById('messagesSpinner');
-        const sendSpinner = document.getElementById('sendSpinner');
-        const confirmSpinner = document.getElementById('confirmSpinner');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBarFill = document.getElementById('progressBarFill');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const toast = document.getElementById('toast');
-        const fileValidation = document.getElementById('fileValidation');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const timerText = document.getElementById('timerText');
-        const newTemplateName = document.getElementById('newTemplateName');
-        const variablesContainer = document.getElementById('variablesContainer');
-        const addVariableBtn = document.getElementById('addVariableBtn');
-        const saveTemplateBtn = document.getElementById('saveTemplateBtn');
-        const cancelAddTemplateBtn = document.getElementById('cancelAddTemplateBtn');
-        const addTemplateError = document.getElementById('addTemplateError');
-        let jsonData = [];
-        let confirmationCode = '';
+            const validUserId = 'abhishek.tiwari@thesleepcompany.in';
+            const validPassword = 'tsc@123';
 
-        // Load custom templates from localStorage
-        function loadCustomTemplates() {
-            const stored = localStorage.getItem('customTemplates');
-            if (stored) {
-                const customs = JSON.parse(stored);
-                for (let name in customs) {
-                    templateConfigs[name] = { variables: customs[name], isCustom: true };
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                    templateSelect.appendChild(option);
-                }
-            }
-        }
-        loadCustomTemplates();
-
-        function escapeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        function isValidPhoneNumber(phone) {
-            return /^\+?\d{10,15}$/.test(phone);
-        }
-
-        function normalizeDate(dateStr) {
-            if (!dateStr) return new Date().toLocaleDateString('en-GB').replace(/\//g, '/');
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime())) {
-                return dateStr.replace(/-/g, '/').trim();
-            }
-            return date.toLocaleDateString('en-GB').replace(/\//g, '/');
-        }
-
-        function cleanCommissionAmount(amount) {
-            return amount?.toString().trim().replace(/,/g, '') || '';
-        }
-
-        function normalizeValue(varName, value) {
-            if (varName.toLowerCase().includes('amount')) {
-                return cleanCommissionAmount(value);
-            } else if (varName.toLowerCase().includes('date')) {
-                return normalizeDate(value);
+            if (userId === validUserId && password === validPassword) {
+                window.location.href = 'main.html';
             } else {
-                return value?.toString().trim() || '';
-            }
-        }
-
-        function generateConfirmationCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
-        }
-
-        function showToast(message, duration = 3000) {
-            toast.textContent = message;
-            toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, duration);
-        }
-
-        function startOTPTimer() {
-            confirmCodeInput.value = '';
-            confirmStatus.classList.add('hidden');
-            confirmationCode = generateConfirmationCode();
-            generatedCodeInput.value = confirmationCode;
-            let timeLeft = 30;
-            timerDisplay.textContent = timeLeft;
-            timerText.textContent = timeLeft;
-            const timerCircle = document.querySelector('.otp-timer circle');
-            timerCircle.style.animation = 'none';
-            void timerCircle.offsetWidth;
-            timerCircle.style.animation = 'countdown 30s linear forwards';
-            const timerInterval = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = timeLeft;
-                timerText.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    if (!confirmModal.classList.contains('hidden')) {
-                        confirmStatus.textContent = 'Code expired. Please upload the file again to generate a new code.';
-                        confirmStatus.classList.remove('hidden');
-                        showToast('Confirmation code expired.');
-                    }
-                }
-            }, 1000);
-            setTimeout(() => {
-                clearInterval(timerInterval);
-            }, 30000);
-        }
-
-        async function validateAndProcessData(data, isFromAPI = false) {
-            const selectedTemplate = templateSelect.value;
-            const config = templateConfigs[selectedTemplate];
-            if (!config) {
-                uploadError.textContent = 'Invalid template selected.';
-                uploadError.style.display = 'block';
-                return false;
-            }
-            const requiredColumns = ['phoneNo', ...config.variables];
-            const headers = data.length > 0 ? Object.keys(data[0]) : [];
-            const missingColumns = requiredColumns.filter(col => !headers.includes(col));
-            if (missingColumns.length > 0) {
-                uploadError.textContent = `Error: Missing required columns: ${missingColumns.join(', ')}. Expected: ${requiredColumns.join(', ')}.`;
-                uploadError.style.display = 'block';
-                statusDiv.textContent = '';
-                previewBtn.disabled = true;
-                viewMessagesBtn.disabled = true;
-                sendAllBtn.disabled = true;
-                jsonData = [];
-                loadingOverlay.style.display = 'none';
-                showToast(isFromAPI ? 'Missing required columns in API data.' : 'Missing required columns.');
-                return false;
-            }
-
-            jsonData = data.map((row, index) => {
-                const rowData = {
-                    phoneNo: row.phoneNo?.toString().trim() || '',
-                    variables: {},
-                    rowIndex: index + 2
-                };
-                config.variables.forEach(varName => {
-                    rowData.variables[varName] = normalizeValue(varName, row[varName]);
-                });
-                return rowData;
-            });
-
-            const invalidPhones = jsonData.filter(row => !isValidPhoneNumber(row.phoneNo));
-            if (invalidPhones.length > 0) {
-                uploadError.textContent = `Error: Invalid phone numbers in rows: ${invalidPhones.map(r => r.rowIndex).join(', ')}. Ensure all phone numbers are 10-15 digits with optional + prefix.`;
-                uploadError.style.display = 'block';
-                statusDiv.textContent = '';
-                previewBtn.disabled = true;
-                viewMessagesBtn.disabled = true;
-                sendAllBtn.disabled = true;
-                jsonData = [];
-                loadingOverlay.style.display = 'none';
-                showToast(isFromAPI ? 'Invalid phone numbers in API data.' : 'Invalid phone numbers detected.');
-                return false;
-            }
-
-            if (jsonData.length === 0) {
-                uploadError.textContent = `Error: No valid data found in the ${isFromAPI ? 'API response' : 'file'}.`;
-                uploadError.style.display = 'block';
-                statusDiv.textContent = '';
-                previewBtn.disabled = true;
-                viewMessagesBtn.disabled = true;
-                sendAllBtn.disabled = true;
-                loadingOverlay.style.display = 'none';
-                showToast(isFromAPI ? 'No valid data in API response.' : 'No valid data found.');
-                return false;
-            }
-
-            previewBtn.disabled = false;
-            viewMessagesBtn.disabled = false;
-            sendAllBtn.disabled = false;
-            statusDiv.textContent = `Data ${isFromAPI ? 'synced' : 'loaded'} successfully. ${jsonData.length} records found.`;
-            loadingOverlay.style.display = 'none';
-            showToast(isFromAPI ? 'Data synced successfully!' : 'File uploaded successfully!');
-            return true;
-        }
-
-        [previewModal, messageModal, confirmModal, addTemplateModal].forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('show');
-                    if (modal === previewModal) tableBody.innerHTML = '';
-                    if (modal === messageModal) messageCards.innerHTML = '';
-                }
-            });
-        });
-
-        copyCodeBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(generatedCodeInput.value).then(() => {
-                copyCodeBtn.textContent = 'Copied!';
-                showToast('Confirmation code copied!');
-                setTimeout(() => {
-                    copyCodeBtn.textContent = 'Copy';
-                }, 2000);
-            });
-        });
-
-        addTemplateBtn.addEventListener('click', () => {
-            newTemplateName.value = '';
-            variablesContainer.innerHTML = '';
-            addTemplateError.style.display = 'none';
-            addTemplateModal.classList.remove('hidden');
-            addTemplateModal.classList.add('show');
-        });
-
-        cancelAddTemplateBtn.addEventListener('click', () => {
-            addTemplateModal.classList.add('hidden');
-            addTemplateModal.classList.remove('show');
-        });
-
-        addVariableBtn.addEventListener('click', () => {
-            const div = document.createElement('div');
-            div.className = 'flex items-center gap-2';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'input-field flex-grow';
-            input.placeholder = 'e.g., order_id';
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'btn btn-danger text-sm';
-            removeBtn.textContent = 'Remove';
-            removeBtn.addEventListener('click', () => div.remove());
-            div.appendChild(input);
-            div.appendChild(removeBtn);
-            variablesContainer.appendChild(div);
-        });
-
-        saveTemplateBtn.addEventListener('click', () => {
-            const name = newTemplateName.value.trim();
-            if (!name) {
-                addTemplateError.textContent = 'Template name is required.';
-                addTemplateError.style.display = 'block';
-                return;
-            }
-            if (templateConfigs[name]) {
-                addTemplateError.textContent = 'Template name already exists.';
-                addTemplateError.style.display = 'block';
-                return;
-            }
-            const vars = Array.from(variablesContainer.querySelectorAll('input')).map(input => input.value.trim()).filter(v => v);
-            if (vars.length === 0) {
-                addTemplateError.textContent = 'At least one variable is required.';
-                addTemplateError.style.display = 'block';
-                return;
-            }
-            templateConfigs[name] = { variables: vars, isCustom: true };
-            const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-            templateSelect.appendChild(option);
-            // Save to localStorage
-            const customs = {};
-            for (let key in templateConfigs) {
-                if (templateConfigs[key].isCustom) {
-                    customs[key] = templateConfigs[key].variables;
-                }
-            }
-            localStorage.setItem('customTemplates', JSON.stringify(customs));
-            addTemplateModal.classList.add('hidden');
-            addTemplateModal.classList.remove('show');
-            showToast('Template added successfully!');
-        });
-
-        syncBtn.addEventListener('click', async () => {
-            syncBtn.classList.add('spinning');
-            syncSpinner.style.display = 'inline-block';
-            syncBtn.querySelector('svg').style.display = 'none';
-            statusDiv.textContent = 'Syncing data from Architect Sheet...';
-            uploadError.style.display = 'none';
-            fileInput.value = '';
-            loadingOverlay.style.display = 'flex';
-
-            try {
-                const response = await fetch(GOOGLE_SHEET_API, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    signal: AbortSignal.timeout(10000)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(`API error (status ${response.status}): ${errorData.message || 'Unknown error'}`);
-                }
-
-                const data = await response.json();
-                if (!Array.isArray(data)) {
-                    throw new Error('Invalid API response: Expected an array of objects.');
-                }
-
-                const isValid = await validateAndProcessData(data, true);
-                if (isValid) {
-                    viewMessagesBtn.disabled = false;
-                    previewBtn.disabled = false;
-                    sendAllBtn.disabled = false;
-                    fileValidation.classList.add('hidden');
-                }
-            } catch (error) {
-                uploadError.textContent = `Error syncing data: ${error.message}`;
-                uploadError.style.display = 'block';
-                statusDiv.textContent = '';
-                previewBtn.disabled = true;
-                viewMessagesBtn.disabled = true;
-                sendAllBtn.disabled = true;
-                jsonData = [];
-                loadingOverlay.style.display = 'none';
-                showToast(`Error syncing data: ${error.message}`);
-            } finally {
-                syncBtn.classList.remove('spinning');
-                syncSpinner.style.display = 'none';
-                syncBtn.querySelector('svg').style.display = 'block';
+                loginError.textContent = 'Invalid User ID or Password.';
+                loginError.style.display = 'block';
             }
         });
 
-        async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        ...options,
-                        signal: AbortSignal.timeout(10000)
-                    });
-                    return response;
-                } catch (error) {
-                    if (i === retries - 1) throw error;
-                    await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
-                }
-            }
-        }
-
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) {
-                uploadError.textContent = 'No file selected. Please choose an Excel file.';
-                uploadError.style.display = 'block';
-                fileValidation.textContent = 'No file selected.';
-                fileValidation.classList.remove('hidden');
-                statusDiv.textContent = '';
-                previewBtn.disabled = true;
-                viewMessagesBtn.disabled = true;
-                sendAllBtn.disabled = true;
-                showToast('No file selected.');
-                return;
-            }
-
-            if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-                uploadError.textContent = 'Invalid file format. Please upload an Excel file (.xlsx or .xls).';
-                uploadError.style.display = 'block';
-                fileValidation.textContent = 'Invalid file format.';
-                fileValidation.classList.remove('hidden');
-                statusDiv.textContent = '';
-                previewBtn.disabled = true;
-                viewMessagesBtn.disabled = true;
-                sendAllBtn.disabled = true;
-                showToast('Invalid file format.');
-                return;
-            }
-
-            fileValidation.classList.add('hidden');
-            statusDiv.textContent = 'Processing file...';
-            uploadError.style.display = 'none';
-            loadingOverlay.style.display = 'flex';
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                try {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false, blankrows: false });
-                    await validateAndProcessData(json, false);
-                } catch (error) {
-                    uploadError.textContent = 'Error reading file: ' + error.message;
-                    uploadError.style.display = 'block';
-                    statusDiv.textContent = '';
-                    previewBtn.disabled = true;
-                    viewMessagesBtn.disabled = true;
-                    sendAllBtn.disabled = true;
-                    jsonData = [];
-                    loadingOverlay.style.display = 'none';
-                    showToast('Error reading file.');
-                }
-            };
-            reader.onerror = () => {
-                uploadError.textContent = 'Error reading file. Please try again.';
-                uploadError.style.display = 'block';
-                statusDiv.textContent = '';
-                previewBtn.disabled = true;
-                viewMessagesBtn.disabled = true;
-                sendAllBtn.disabled = true;
-                jsonData = [];
-                loadingOverlay.style.display = 'none';
-                showToast('Error reading file.');
-            };
-            reader.readAsArrayBuffer(file);
+        loginError.addEventListener('click', () => {
+            loginError.style.display = 'none';
         });
-
-        function populateTable() {
-            tableHead.innerHTML = '';
-            tableBody.innerHTML = '';
-            if (jsonData.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400">No data available</td></tr>';
-                return;
-            }
-            const selectedTemplate = templateSelect.value;
-            const config = templateConfigs[selectedTemplate];
-            const headTr = document.createElement('tr');
-            const phoneTh = document.createElement('th');
-            phoneTh.scope = 'col';
-            phoneTh.id = 'phoneHeader';
-            phoneTh.textContent = 'Phone Number';
-            headTr.appendChild(phoneTh);
-            config.variables.forEach((varName, idx) => {
-                const th = document.createElement('th');
-                th.scope = 'col';
-                th.id = `varHeader${idx}`;
-                th.textContent = varName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                headTr.appendChild(th);
-            });
-            tableHead.appendChild(headTr);
-
-            jsonData.forEach(row => {
-                const tr = document.createElement('tr');
-                let tdHtml = `<td data-label="Phone Number" headers="phoneHeader">${escapeHTML(row.phoneNo || 'N/A')}</td>`;
-                config.variables.forEach((varName, idx) => {
-                    tdHtml += `<td data-label="${varName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}" headers="varHeader${idx}">${escapeHTML(row.variables[varName] || 'N/A')}</td>`;
-                });
-                tr.innerHTML = tdHtml;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        previewBtn.addEventListener('click', () => {
-            if (jsonData.length === 0) {
-                statusDiv.textContent = 'No data to display. Please upload a valid Excel file or sync data.';
-                showToast('No data to display.');
-                return;
-            }
-            previewSpinner.style.display = 'inline-block';
-            populateTable();
-            previewModal.classList.remove('hidden');
-            previewModal.classList.add('show');
-            previewSpinner.style.display = 'none';
-            showToast('Data preview opened.');
-        });
-
-        viewMessagesBtn.addEventListener('click', () => {
-            if (jsonData.length === 0) {
-                statusDiv.textContent = 'No data to display. Please upload a valid Excel file or sync data.';
-                showToast('No data to display.');
-                return;
-            }
-            const selectedTemplate = templateSelect.value;
-            const config = templateConfigs[selectedTemplate];
-            messagesSpinner.style.display = 'inline-block';
-            messageCards.innerHTML = '';
-            const row = jsonData[0];
-            let messageTemplate;
-            if (!config.isCustom) {
-                if (selectedTemplate === 'architect_commission') {
-                    messageTemplate = `Dear Partner,\n\nThank you for referring your client to The Sleep Company. We ensure product quality and smooth order fulfillment.\n\nYour commission of ${escapeHTML(row.variables.commissionAmount || 'N/A')} is being processed for order(s) ${escapeHTML(row.variables.order_id || 'N/A')}. The UTRN will be shared by ${escapeHTML(row.variables.commissionissueDate || 'N/A')}.\n\nWe will continue to support you with timely updates and necessary information.\nThe Sleep Company`;
-                } else if (selectedTemplate === 'new_architect') {
-                    messageTemplate = `Dear Partner,\n\nThank you for your referral in ${escapeHTML(row.variables.refferalMonth || 'N/A')}. Your commission of ${escapeHTML(row.variables.commissionAmount || 'N/A')} for order ${escapeHTML(row.variables.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
-                } else if (selectedTemplate === 'architect_may_template') {
-                    messageTemplate = `Dear Partner,\n\nYour payment of ${escapeHTML(row.variables.commissionAmount || 'N/A')} for order ${escapeHTML(row.variables.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
-                }
-            } else {
-                const varsStr = config.variables.map(v => `${v.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}: ${escapeHTML(row.variables[v] || 'N/A')}`).join('\n');
-                messageTemplate = `Dear Partner,\n\nYour ${selectedTemplate.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} details:\n${varsStr}\n\nBest regards,\nThe Sleep Company`;
-            }
-            const card = document.createElement('div');
-            card.className = 'p-3';
-            card.innerHTML = `
-                <div class="whatsapp-message">
-                    <p class="text-sm">${messageTemplate}</p>
-                    <p class="timestamp">12:00 PM</p>
-                </div>
-            `;
-            messageCards.appendChild(card);
-            messageModal.classList.remove('hidden');
-            messageModal.classList.add('show');
-            messagesSpinner.style.display = 'none';
-            showToast('Message preview opened.');
-        });
-
-        function downloadFailedRows(failedRows) {
-            if (failedRows.length === 0) return;
-            const selectedTemplate = templateSelect.value;
-            const config = templateConfigs[selectedTemplate];
-            let csvHeader = `Row,Phone`;
-            config.variables.forEach(v => csvHeader += `,${v}`);
-            csvHeader += ',Error';
-            const csvRows = failedRows.map(r => {
-                let rowStr = `${r.rowIndex},${r.phoneNo || ''}`;
-                config.variables.forEach(v => rowStr += `,${r.variables[v] || ''}`);
-                rowStr += `,${r.error.replace(/,/g, '')}`;
-                return rowStr;
-            });
-            const csv = [csvHeader, ...csvRows].join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'failed_messages.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('Failed rows downloaded.');
-        }
-
-        async function sendMessageBatch(batch) {
-            const selectedTemplate = templateSelect.value;
-            const failedRows = [];
-            const promises = batch.map(async (row) => {
-                const payload = {
-                    template_attributes: {
-                        templateName: selectedTemplate,
-                        phoneNo: row.phoneNo,
-                        ...row.variables
-                    }
-                };
-                try {
-                    const response = await fetchWithRetry(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-api-key': API_TOKEN
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                    if (response.ok) {
-                        return { success: true };
-                    } else {
-                        return { success: false, error: `API error (status ${response.status})`, row };
-                    }
-                } catch (error) {
-                    return { success: false, error: error.message, row };
-                }
-            });
-
-            const results = await Promise.all(promises);
-            results.forEach(result => {
-                if (!result.success) {
-                    failedRows.push({
-                        rowIndex: result.row.rowIndex,
-                        phoneNo: result.row.phoneNo,
-                        variables: result.row.variables,
-                        error: result.error
-                    });
-                }
-            });
-            return { successCount: results.filter(r => r.success).length, failedRows };
-        }
-
-        sendAllBtn.addEventListener('click', async () => {
-            if (jsonData.length === 0) {
-                statusDiv.textContent = 'No data to send. Please upload a valid Excel file or sync data.';
-                showToast('No data to send.');
-                return;
-            }
-            startOTPTimer();
-            confirmModal.classList.remove('hidden');
-            confirmModal.classList.add('show');
-            showToast('Confirm notification sending.');
-        });
-
-        submitConfirmBtn.addEventListener('click', async () => {
-            const enteredCode = confirmCodeInput.value.trim().toUpperCase();
-            if (enteredCode.length !== 6) {
-                confirmStatus.textContent = 'Please enter a valid 6-character code.';
-                confirmStatus.classList.remove('hidden');
-                showToast('Invalid confirmation code.');
-                return;
-            }
-            if (enteredCode !== confirmationCode) {
-                confirmStatus.textContent = 'Incorrect code. Please copy and paste the code above.';
-                confirmStatus.classList.remove('hidden');
-                showToast('Incorrect confirmation code.');
-                return;
-            }
-
-            confirmSpinner.style.display = 'inline-block';
-            sendSpinner.style.display = 'inline-block';
-            confirmModal.classList.add('hidden');
-            confirmModal.classList.remove('show');
-            statusDiv.textContent = `Sending ${jsonData.length} notifications...`;
-            progressContainer.classList.remove('hidden');
-            progressBarFill.style.width = '0%';
-
-            let successCount = 0;
-            let errorCount = 0;
-            const failedRows = [];
-
-            for (let i = 0; i < jsonData.length; i += BATCH_SIZE) {
-                const batch = jsonData.slice(i, i + BATCH_SIZE);
-                const { successCount: batchSuccess, failedRows: batchFailed } = await sendMessageBatch(batch);
-                successCount += batchSuccess;
-                errorCount += batchFailed.length;
-                failedRows.push(...batchFailed);
-                progressBarFill.style.width = `${Math.min(((i + batch.length) / jsonData.length) * 100, 100)}%`;
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            confirmSpinner.style.display = 'none';
-            sendSpinner.style.display = 'none';
-            progressContainer.classList.add('hidden');
-
-            let statusMessage = `Notifications sent: ${successCount} successful, ${errorCount} failed.`;
-            if (errorCount > 0) {
-                statusMessage += ` Failed rows: ${failedRows.map(r => `Row ${r.rowIndex} (${r.phoneNo || 'N/A'}): ${r.error}`).join('; ')}.`;
-                statusMessage += ' <button id="downloadFailedBtn" class="btn">Download Failed Rows</button>';
-            }
-            statusDiv.innerHTML = statusMessage;
-
-            if (errorCount > 0) {
-                document.getElementById('downloadFailedBtn').addEventListener('click', () => {
-                    downloadFailedRows(failedRows);
-                });
-            }
-            showToast(`Notifications sent: ${successCount} successful, ${errorCount} failed.`);
-        });
-
-        cancelConfirmBtn.addEventListener('click', () => {
-            confirmModal.classList.add('hidden');
-            confirmModal.classList.remove('show');
-            statusDiv.textContent = 'Notification sending cancelled.';
-            showToast('Notification sending cancelled.');
-        });
-
-        closePreviewBtn.addEventListener('click', () => {
-            previewModal.classList.add('hidden');
-            previewModal.classList.remove('show');
-            tableBody.innerHTML = '';
-            showToast('Data preview closed.');
-        });
-
-        closeMessageBtn.addEventListener('click', () => {
-            messageModal.classList.add('hidden');
-            messageModal.classList.remove('show');
-            messageCards.innerHTML = '';
-            showToast('Message preview closed.');
-        });
-
-        uploadError.addEventListener('click', () => {
-            uploadError.style.display = 'none';
-        });
-
-        loadingOverlay.style.display = 'flex';
-        setTimeout(() => {
-            loadingOverlay.style.display = 'none';
-        }, 1500);
     </script>
 </body>
 </html>
