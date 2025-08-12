@@ -317,13 +317,13 @@
                 return;
             }
 
-            const validUserId = 'abhishek.tiwari@thesleepcompany.in';
+            const validDomain = '@thesleepcompany.in';
             const validPassword = 'tsc@123';
 
-            if (userId === validUserId && password === validPassword) {
-                window.location.href = 'main.html';
+            if (userId.endsWith(validDomain) && password === validPassword) {
+                window.location.href = 'index.html';
             } else {
-                loginError.textContent = 'Invalid User ID or Password.';
+                loginError.textContent = 'Invalid User ID or Password. User ID must end with @thesleepcompany.in.';
                 loginError.style.display = 'block';
             }
         });
