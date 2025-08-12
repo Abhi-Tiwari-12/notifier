@@ -12,7 +12,7 @@ app.use(cors({
 
 app.get('/api/sheet', async (req, res) => {
     try {
-        const googleSheetUrl = 'https://script.google.com/macros/s/AKfycby7FqEEpRDBtoPELVcMnfRHjTuqFIJdgELuP_LhJ5OgOhniyNP8hcnGQ7zOC-g5HpFC/exec';
+        const googleSheetUrl = 'https://script.google.com/macros/s/AKfycbxh-ffRKlvik_-H7-Jv4uuFAlN_68O6qIQYlZ0LJMkjZMZS9Y67O9BFIRGDavoE9vkq/exec';
         const response = await fetch(googleSheetUrl, {
             method: 'GET',
             headers: {
