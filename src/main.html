@@ -633,6 +633,7 @@
                         <option value="architect_commission">Architect Commission Template</option>
                         <option value="new_architect">New Architect</option>
                         <option value="architect_may_template">Architect May Template</option>
+                        <option value="architect_commission_new">Architect Commission New</option>
                     </select>
                 </div>
                 <div>
@@ -819,6 +820,10 @@
             },
             'architect_may_template': {
                 variables: ['order_id', 'commissionAmount'],
+                isCustom: false
+            },
+            'architect_commission_new': {
+                variables: ['order_id', 'commissionAmount', 'commissionissueDate'],
                 isCustom: false
             }
         };
@@ -1329,6 +1334,8 @@
                     messageTemplate = `Dear Partner,\n\nThank you for your referral in ${escapeHTML(row.variables.refferalMonth || 'N/A')}. Your commission of ${escapeHTML(row.variables.commissionAmount || 'N/A')} for order ${escapeHTML(row.variables.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
                 } else if (selectedTemplate === 'architect_may_template') {
                     messageTemplate = `Dear Partner,\n\nYour payment of ${escapeHTML(row.variables.commissionAmount || 'N/A')} for order ${escapeHTML(row.variables.order_id || 'N/A')} is being processed.\n\nBest regards,\nThe Sleep Company`;
+                } else if (selectedTemplate === 'architect_commission_new') {
+                    messageTemplate = `Dear Partner,\n\nThank you for your continued partnership with The Sleep Company.\n\nYour commission of ${escapeHTML(row.variables.commissionAmount || 'N/A')} for order ${escapeHTML(row.variables.order_id || 'N/A')} is being processed, and the UTRN will be shared by ${escapeHTML(row.variables.commissionissueDate || 'N/A')}.\n\nBest regards,\nThe Sleep Company`;
                 }
             } else {
                 const varsStr = config.variables.map(v => `${v.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}: ${escapeHTML(row.variables[v] || 'N/A')}`).join('\n');
